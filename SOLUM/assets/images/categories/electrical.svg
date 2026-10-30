@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="100%" height="100%">
+  <defs>
+    <linearGradient id="elecBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="100%" stop-color="#fef3c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="260" rx="14" fill="url(#elecBg)"/>
+
+  <!-- Ground -->
+  <line x1="20" y1="210" x2="380" y2="210" stroke="#d97706" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Tilted damaged electric pole -->
+  <g transform="rotate(12 180 210)">
+    <rect x="172" y="50" width="16" height="160" rx="3" fill="#78350f"/>
+    <!-- Crossarm -->
+    <rect x="135" y="65" width="90" height="10" rx="2" fill="#92400e"/>
+    <!-- Insulators -->
+    <circle cx="145" cy="80" r="5" fill="#f59e0b"/>
+    <circle cx="215" cy="80" r="5" fill="#f59e0b"/>
+  </g>
+
+  <!-- Sagging and severed power line -->
+  <path d="M 60 75 Q 120 110 160 85" stroke="#b45309" stroke-width="3" fill="none"/>
+  <path d="M 230 100 Q 280 145 320 195" stroke="#dc2626" stroke-width="3" fill="none"/>
+  
+  <!-- Sparks / Danger symbol -->
+  <path d="M 320 190 L 335 175 L 328 175 L 342 155 L 325 170 L 332 170 Z" fill="#ef4444"/>
+  <circle cx="320" cy="195" r="14" fill="#fee2e2" opacity="0.6"/>
+
+  <!-- Warning badge -->
+  <rect x="25" y="25" width="180" height="30" rx="6" fill="#b91c1c"/>
+  <text x="35" y="45" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#ffffff">⚡ ELECTRICAL HAZARD</text>
+  <text x="25" y="240" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#92400e">Fallen wire · Damaged pole · Transformer</text>
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="100%" height="100%">
+  <defs>
+    <linearGradient id="drainSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <linearGradient id="concreteGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="50%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    <linearGradient id="pumpWater" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="360" fill="url(#drainSky)"/>
+  
+  <!-- Urban road cross-section -->
+  <path d="M0 160 L600 160 L600 240 L0 240 Z" fill="#334155"/>
+  <!-- Road divider lines -->
+  <line x1="20" y1="200" x2="80" y2="200" stroke="#f8fafc" stroke-width="4" stroke-dasharray="25,25"/>
+  <line x1="120" y1="200" x2="220" y2="200" stroke="#f8fafc" stroke-width="4" stroke-dasharray="25,25"/>
+  <line x1="260" y1="200" x2="360" y2="200" stroke="#f8fafc" stroke-width="4" stroke-dasharray="25,25"/>
+  <line x1="400" y1="200" x2="580" y2="200" stroke="#f8fafc" stroke-width="4" stroke-dasharray="25,25"/>
+
+  <!-- Stormwater culvert cutaway -->
+  <rect x="60" y="240" width="480" height="110" rx="12" fill="url(#concreteGrad)"/>
+  <rect x="80" y="255" width="440" height="85" rx="8" fill="#1e293b"/>
+
+  <!-- Flowing drainage water -->
+  <path d="M80 300 Q 190 285 300 300 T 520 295 L 520 340 L 80 340 Z" fill="url(#pumpWater)"/>
+  
+  <!-- Sluice and pump machinery -->
+  <rect x="260" y="110" width="80" height="90" rx="6" fill="#0f766e" stroke="#134e4a" stroke-width="2"/>
+  <circle cx="300" cy="155" r="22" fill="#14b8a6"/>
+  <rect x="290" y="190" width="20" height="65" fill="#f59e0b"/>
+  
+  <!-- Flow arrows -->
+  <path d="M120 315 L160 315 M150 308 L160 315 L150 322" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M220 315 L260 315 M250 308 L260 315 L250 322" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M380 315 L420 315 M410 308 L420 315 L410 322" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Badge -->
+  <rect x="25" y="25" width="210" height="34" rx="8" fill="#ffffff" fill-opacity="0.9" stroke="#0f766e" stroke-width="1.5"/>
+  <circle cx="45" cy="42" r="6" fill="#0f766e"/>
+  <text x="60" y="46" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#0f766e">STORMWATER DRAINAGE &amp; CULVERT</text>
+
+  <rect x="420" y="25" width="155" height="26" rx="6" fill="#0f172a" fill-opacity="0.75"/>
+  <text x="432" y="42" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">Municipal Pumping Network</text>
+</svg>

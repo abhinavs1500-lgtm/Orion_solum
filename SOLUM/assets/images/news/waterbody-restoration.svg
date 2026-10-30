@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="100%" height="100%">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="60%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
+    </linearGradient>
+    <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="50%" stop-color="#0369a1"/>
+      <stop offset="100%" stop-color="#075985"/>
+    </linearGradient>
+    <linearGradient id="grassGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+    <linearGradient id="bundGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#86efac"/>
+      <stop offset="100%" stop-color="#22c55e"/>
+    </linearGradient>
+  </defs>
+  <!-- Background sky -->
+  <rect width="600" height="360" fill="url(#skyGrad)"/>
+  
+  <!-- Distant cityscape skyline -->
+  <path d="M40 210 h25 v-40 h30 v25 h20 v-55 h25 v70 h40 v-30 h25 v30 h60 v-65 h35 v65 h40 v-45 h30 v45 h70 v-80 h35 v80 h125 v150 H0 v-150 z" fill="#cbd5e1" opacity="0.6"/>
+  <path d="M80 220 h30 v-30 h25 v30 h70 v-40 h35 v40 h50 v-50 h40 v50 h60 v-35 h30 v35 h90 v140 H0 v-140 z" fill="#94a3b8" opacity="0.7"/>
+
+  <!-- Wetland greenery & bunds -->
+  <path d="M0 210 Q 150 195 300 215 T 600 205 L 600 360 L 0 360 Z" fill="url(#grassGrad)"/>
+  <path d="M0 240 Q 160 220 320 245 T 600 230 L 600 360 L 0 360 Z" fill="url(#bundGrad)"/>
+
+  <!-- Water body / Lake expanse -->
+  <path d="M0 260 C 140 240, 240 280, 380 265 C 470 255, 540 270, 600 260 L 600 360 L 0 360 Z" fill="url(#waterGrad)"/>
+  
+  <!-- Water ripples -->
+  <path d="M50 290 Q 120 285 190 290 M 240 310 Q 340 305 440 310 M 120 335 Q 260 330 400 335 M 420 285 Q 490 282 560 285" stroke="#e0f2fe" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.65"/>
+  
+  <!-- Wetland vegetation & reeds -->
+  <g stroke="#15803d" stroke-width="2.5" stroke-linecap="round">
+    <line x1="60" y1="265" x2="55" y2="235"/>
+    <line x1="65" y1="265" x2="68" y2="230"/>
+    <line x1="72" y1="265" x2="80" y2="238"/>
+    <line x1="480" y1="260" x2="475" y2="228"/>
+    <line x1="488" y1="260" x2="492" y2="222"/>
+    <line x1="495" y1="260" x2="505" y2="232"/>
+    <line x1="510" y1="265" x2="518" y2="238"/>
+  </g>
+
+  <!-- Ecological monitoring tag / badge -->
+  <rect x="25" y="25" width="220" height="34" rx="8" fill="#ffffff" fill-opacity="0.9" stroke="#0284c7" stroke-width="1.5"/>
+  <circle cx="45" cy="42" r="6" fill="#0284c7"/>
+  <text x="60" y="46" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#0369a1">WETLAND &amp; WATERBODY CONSERVATION</text>
+  
+  <!-- Location watermark -->
+  <rect x="420" y="315" width="160" height="26" rx="6" fill="#0f172a" fill-opacity="0.75"/>
+  <text x="432" y="332" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">Pallikaranai / Ennore Basin</text>
+</svg>

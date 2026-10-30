@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="100%" height="100%">
+  <defs>
+    <linearGradient id="hillSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <linearGradient id="hill1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#14532d"/>
+      <stop offset="100%" stop-color="#166534"/>
+    </linearGradient>
+    <linearGradient id="slopeRock" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#9a3412"/>
+      <stop offset="100%" stop-color="#7c2d12"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="360" fill="url(#hillSky)"/>
+
+  <!-- Distant Ghats ridge -->
+  <path d="M 0 160 Q 150 110 320 140 T 600 110 L 600 360 L 0 360 Z" fill="#475569" opacity="0.5"/>
+  <path d="M 0 200 Q 180 140 360 170 T 600 150 L 600 360 L 0 360 Z" fill="#334155" opacity="0.6"/>
+
+  <!-- Steep hillside profile -->
+  <path d="M 0 140 Q 220 160 380 240 L 600 360 L 0 360 Z" fill="url(#hill1)"/>
+
+  <!-- Soil slip scar / landslide cut-slope -->
+  <path d="M 120 180 Q 180 190 220 230 L 190 260 Q 140 230 110 200 Z" fill="url(#slopeRock)"/>
+  
+  <!-- Ghat Road winding through mountain -->
+  <path d="M 0 310 Q 180 280 280 300 T 600 270" stroke="#64748b" stroke-width="14" fill="none"/>
+  <path d="M 0 310 Q 180 280 280 300 T 600 270" stroke="#f8fafc" stroke-width="1.8" stroke-dasharray="8,8" fill="none"/>
+
+  <!-- Retaining wall & gabion mesh -->
+  <rect x="170" y="270" width="130" height="24" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="2"/>
+  <line x1="190" y1="270" x2="190" y2="294" stroke="#475569"/>
+  <line x1="210" y1="270" x2="210" y2="294" stroke="#475569"/>
+  <line x1="230" y1="270" x2="230" y2="294" stroke="#475569"/>
+  <line x1="250" y1="270" x2="250" y2="294" stroke="#475569"/>
+  <line x1="270" y1="270" x2="270" y2="294" stroke="#475569"/>
+
+  <!-- Warning indicator icon -->
+  <polygon points="175,170 195,135 215,170" fill="#f59e0b" stroke="#b45309" stroke-width="2"/>
+  <text x="195" y="165" font-family="system-ui" font-size="16" font-weight="900" fill="#78350f" text-anchor="middle">!</text>
+
+  <!-- Badge -->
+  <rect x="25" y="25" width="220" height="34" rx="8" fill="#ffffff" fill-opacity="0.9" stroke="#b45309" stroke-width="1.5"/>
+  <circle cx="45" cy="42" r="6" fill="#f59e0b"/>
+  <text x="60" y="46" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#92400e">WESTERN GHATS SLOPE STABILITY</text>
+
+  <rect x="420" y="315" width="155" height="26" rx="6" fill="#0f172a" fill-opacity="0.8"/>
+  <text x="432" y="332" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">Nilgiris Ghat Road Sector</text>
+</svg>

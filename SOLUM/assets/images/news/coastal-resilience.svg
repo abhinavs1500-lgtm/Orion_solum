@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="100%" height="100%">
+  <defs>
+    <linearGradient id="seaSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#e0f2fe"/>
+    </linearGradient>
+    <linearGradient id="seaWave" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="360" fill="url(#seaSky)"/>
+
+  <!-- Distant sea horizon -->
+  <rect x="0" y="160" width="600" height="200" fill="url(#seaWave)"/>
+
+  <!-- Waves -->
+  <path d="M 0 190 Q 75 175 150 190 T 300 190 T 450 190 T 600 190 L 600 360 L 0 360 Z" fill="#075985" opacity="0.6"/>
+  <path d="M 0 220 Q 80 205 160 220 T 320 220 T 480 220 T 600 220 L 600 360 L 0 360 Z" fill="#0c4a6e" opacity="0.85"/>
+
+  <!-- Coastline / Seawall with tetrapods -->
+  <path d="M 0 260 L 260 260 L 320 360 L 0 360 Z" fill="#475569"/>
+  
+  <!-- Tetrapod armor concrete blocks -->
+  <g fill="#94a3b8" stroke="#334155" stroke-width="1.5">
+    <polygon points="230,240 250,230 260,250 240,260"/>
+    <polygon points="255,235 275,225 285,245 265,255"/>
+    <polygon points="270,250 290,240 300,260 280,270"/>
+    <polygon points="245,260 265,250 275,270 255,280"/>
+    <polygon points="280,265 305,255 315,275 290,285"/>
+    <polygon points="265,280 290,270 300,290 275,300"/>
+    <polygon points="290,295 315,285 325,305 300,315"/>
+  </g>
+
+  <!-- Lighthouse silhouette -->
+  <polygon points="90,260 100,170 120,170 130,260" fill="#f8fafc" stroke="#334155" stroke-width="2"/>
+  <rect x="95" y="155" width="30" height="15" fill="#ef4444"/>
+  <polygon points="95,155 110,135 125,155" fill="#1e293b"/>
+  <polygon points="125,160 300,130 300,180" fill="#fef08a" opacity="0.3"/>
+
+  <!-- Badge -->
+  <rect x="25" y="25" width="220" height="34" rx="8" fill="#ffffff" fill-opacity="0.9" stroke="#0284c7" stroke-width="1.5"/>
+  <circle cx="45" cy="42" r="6" fill="#0284c7"/>
+  <text x="60" y="46" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#0369a1">COASTAL SURGE &amp; SEAWALL DEFENCE</text>
+
+  <rect x="420" y="315" width="155" height="26" rx="6" fill="#0f172a" fill-opacity="0.8"/>
+  <text x="432" y="332" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">Coromandel Coastal Zone</text>
+</svg>

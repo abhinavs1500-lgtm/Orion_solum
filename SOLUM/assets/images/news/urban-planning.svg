@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="100%" height="100%">
+  <defs>
+    <linearGradient id="planGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="360" fill="url(#planGrad)"/>
+  
+  <!-- Architectural grid -->
+  <g stroke="#cbd5e1" stroke-width="1" opacity="0.6">
+    <line x1="0" y1="60" x2="600" y2="60"/>
+    <line x1="0" y1="120" x2="600" y2="120"/>
+    <line x1="0" y1="180" x2="600" y2="180"/>
+    <line x1="0" y1="240" x2="600" y2="240"/>
+    <line x1="0" y1="300" x2="600" y2="300"/>
+    <line x1="60" y1="0" x2="60" y2="360"/>
+    <line x1="120" y1="0" x2="120" y2="360"/>
+    <line x1="180" y1="0" x2="180" y2="360"/>
+    <line x1="240" y1="0" x2="240" y2="360"/>
+    <line x1="300" y1="0" x2="300" y2="360"/>
+    <line x1="360" y1="0" x2="360" y2="360"/>
+    <line x1="420" y1="0" x2="420" y2="360"/>
+    <line x1="480" y1="0" x2="480" y2="360"/>
+    <line x1="540" y1="0" x2="540" y2="360"/>
+  </g>
+
+  <!-- Master plan zoning polygons -->
+  <polygon points="90,90 270,70 300,190 110,210" fill="#bbf7d0" stroke="#16a34a" stroke-width="2" opacity="0.75"/>
+  <polygon points="310,75 510,95 490,220 295,200" fill="#bfdbfe" stroke="#2563eb" stroke-width="2" opacity="0.7"/>
+  <polygon points="120,225 320,215 310,320 100,310" fill="#fed7aa" stroke="#ea580c" stroke-width="2" opacity="0.75"/>
+  <polygon points="330,220 530,230 515,325 325,325" fill="#ddd6fe" stroke="#7c3aed" stroke-width="2" opacity="0.7"/>
+
+  <!-- Arterial roadway corridor -->
+  <path d="M 0 140 Q 200 135 300 200 T 600 210" stroke="#475569" stroke-width="16" fill="none"/>
+  <path d="M 0 140 Q 200 135 300 200 T 600 210" stroke="#f1f5f9" stroke-width="2" stroke-dasharray="10,10" fill="none"/>
+
+  <!-- Building footprints -->
+  <rect x="130" y="110" width="40" height="30" rx="3" fill="#15803d"/>
+  <rect x="190" y="105" width="55" height="45" rx="3" fill="#15803d"/>
+  <rect x="340" y="115" width="60" height="40" rx="3" fill="#1d4ed8"/>
+  <rect x="420" y="125" width="45" height="50" rx="3" fill="#1d4ed8"/>
+
+  <!-- Badge -->
+  <rect x="25" y="25" width="230" height="34" rx="8" fill="#ffffff" fill-opacity="0.9" stroke="#0f766e" stroke-width="1.5"/>
+  <circle cx="45" cy="42" r="6" fill="#0f766e"/>
+  <text x="60" y="46" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#0f766e">URBAN RESILIENCE &amp; MASTER PLAN</text>
+
+  <rect x="400" y="315" width="175" height="26" rx="6" fill="#0f172a" fill-opacity="0.8"/>
+  <text x="412" y="332" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#f8fafc">GIS Land Use &amp; Setbacks</text>
+</svg>

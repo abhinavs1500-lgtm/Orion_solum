@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360" width="100%" height="100%">
+  <defs>
+    <radialGradient id="radarGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#052e16"/>
+      <stop offset="60%" stop-color="#022c22"/>
+      <stop offset="100%" stop-color="#064e3b"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="360" fill="url(#radarGlow)"/>
+
+  <!-- Radar grid rings -->
+  <circle cx="300" cy="180" r="50" fill="none" stroke="#22c55e" stroke-width="1.2" opacity="0.4"/>
+  <circle cx="300" cy="180" r="100" fill="none" stroke="#22c55e" stroke-width="1.2" opacity="0.4"/>
+  <circle cx="300" cy="180" r="150" fill="none" stroke="#22c55e" stroke-width="1.5" opacity="0.6"/>
+  <line x1="300" y1="20" x2="300" y2="340" stroke="#22c55e" stroke-width="1.2" opacity="0.35"/>
+  <line x1="140" y1="180" x2="460" y2="180" stroke="#22c55e" stroke-width="1.2" opacity="0.35"/>
+
+  <!-- Precipitation radar reflectivity clusters (dBZ) -->
+  <path d="M 320 130 Q 360 100 410 120 T 450 160 Q 420 190 380 180 T 330 150 Z" fill="#eab308" opacity="0.75"/>
+  <path d="M 345 135 Q 380 115 415 130 T 430 160 Q 400 175 370 170 Z" fill="#ef4444" opacity="0.85"/>
+  <path d="M 370 140 Q 395 130 405 145 T 390 160 Z" fill="#dc2626" opacity="0.95"/>
+  
+  <path d="M 210 210 Q 250 200 270 230 T 260 270 Q 220 280 200 250 Z" fill="#10b981" opacity="0.65"/>
+  <path d="M 225 220 Q 245 215 255 235 T 240 255 Z" fill="#eab308" opacity="0.75"/>
+
+  <!-- Radar sweep line -->
+  <line x1="300" y1="180" x2="420" y2="70" stroke="#86efac" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M 300 180 L 420 70 A 150 150 0 0 0 300 30 Z" fill="#86efac" opacity="0.18"/>
+
+  <!-- Doppler Radar Mast & Dish -->
+  <path d="M 285 240 L 300 180 L 315 240 Z" fill="#64748b"/>
+  <circle cx="300" cy="180" r="10" fill="#f8fafc" stroke="#22c55e" stroke-width="2"/>
+
+  <!-- Badge -->
+  <rect x="25" y="25" width="220" height="34" rx="8" fill="#022c22" fill-opacity="0.9" stroke="#22c55e" stroke-width="1.5"/>
+  <circle cx="45" cy="42" r="6" fill="#22c55e"/>
+  <text x="60" y="46" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#86efac">IMD DOPPLER RADAR &amp; MONSOON</text>
+
+  <rect x="420" y="315" width="155" height="26" rx="6" fill="#022c22" fill-opacity="0.85" stroke="#22c55e" stroke-width="1"/>
+  <text x="432" y="332" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#86efac">Chennai Doppler Radar</text>
+</svg>

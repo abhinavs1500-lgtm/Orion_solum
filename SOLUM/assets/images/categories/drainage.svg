@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 260" width="100%" height="100%">
+  <defs>
+    <linearGradient id="drainBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0fdfa"/>
+      <stop offset="100%" stop-color="#ccfbf1"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="260" rx="14" fill="url(#drainBg)"/>
+
+  <!-- Curb and roadside -->
+  <rect x="0" y="100" width="400" height="60" fill="#64748b"/>
+  <rect x="0" y="150" width="400" height="15" fill="#475569"/>
+
+  <!-- Stormwater catchment inlet / iron grate -->
+  <rect x="90" y="115" width="220" height="40" rx="4" fill="#0f172a"/>
+  <!-- Grate bars -->
+  <line x1="110" y1="117" x2="110" y2="153" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="130" y1="117" x2="130" y2="153" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="150" y1="117" x2="150" y2="153" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="170" y1="117" x2="170" y2="153" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="190" y1="117" x2="190" y2="153" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="210" y1="117" x2="210" y2="153" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="230" y1="117" x2="230" y2="153" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="250" y1="117" x2="250" y2="153" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="270" y1="117" x2="270" y2="153" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="290" y1="117" x2="290" y2="153" stroke="#94a3b8" stroke-width="4"/>
+
+  <!-- Silt / Plastic debris buildup choking grate -->
+  <path d="M 120 155 Q 160 135 210 145 T 280 155 L 280 170 L 120 170 Z" fill="#713f12" opacity="0.85"/>
+  <circle cx="160" cy="148" r="8" fill="#eab308"/>
+  <circle cx="230" cy="146" r="6" fill="#3b82f6"/>
+  
+  <!-- Backed up overflow water -->
+  <path d="M 0 165 C 100 155, 200 175, 400 165 L 400 230 L 0 230 Z" fill="#0284c7" opacity="0.6"/>
+
+  <!-- Badge -->
+  <rect x="25" y="25" width="180" height="30" rx="6" fill="#0f766e"/>
+  <text x="35" y="45" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="700" fill="#ffffff">🚰 DRAINAGE &amp; CULVERT</text>
+  <text x="25" y="240" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="600" fill="#134e4a">Blocked storm drain · Silt choke · Overflow</text>
+</svg>
