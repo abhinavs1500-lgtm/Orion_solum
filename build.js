@@ -76,8 +76,8 @@ fs.mkdirSync(path.join(apiDir, 'maps'), { recursive: true });
 fs.mkdirSync(path.join(apiDir, 'issues'), { recursive: true });
 fs.mkdirSync(path.join(apiDir, 'officials'), { recursive: true });
 
-// Read Maps API key securely from environment variable
-const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY || '';
+// Read Maps API key from environment variable or bundled default
+const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyAOWcDHEha2UfkgMVCRou4YKTNLIswN8BE';
 const mapsConfig = {
   api_key: googleMapsApiKey,
   default_center: { lat: 13.0827, lng: 80.2707, altitude: 450.0 },
@@ -124,65 +124,22 @@ const newsData = {
 };
 fs.writeFileSync(path.join(apiDir, 'news.json'), JSON.stringify(newsData, null, 2));
 
-// Seeded issues fallback
+// Seeded multi-district issues fallback for production Netlify
 const issuesData = [
-  {
-    id: 'SLM-1042',
-    title: 'Power line damage',
-    place: 'Velachery Main Road',
-    type: 'Electricity',
-    district: 'Chennai',
-    priority: 'Critical',
-    status: 'In progress',
-    progress: 45,
-    crew: 8,
-    cost: 240000,
-    hours: 6,
-    owner: 'Electricity response team',
-    reason: 'Isolate electrical hazards before pumping or road clearance.',
-    dependency: 'Isolation clearance before SLM-1043',
-    update: 'Isolation completed; replacement pole and cable crew assigned.',
-    steps: ['Citizen report received', 'Electrical isolation confirmed', 'Replacement work in progress', 'Inspection and safe restoration'],
-    risk: 'Keep clear of fallen wires and flooded electrical equipment.'
-  },
-  {
-    id: 'SLM-1043',
-    title: 'Waterlogging near homes',
-    place: 'Ram Nagar · Velachery',
-    type: 'Drainage',
-    district: 'Chennai',
-    priority: 'High',
-    status: 'In progress',
-    progress: 30,
-    crew: 6,
-    cost: 180000,
-    hours: 8,
-    owner: 'Stormwater drainage team',
-    reason: 'Restore access to homes after electrical clearance.',
-    dependency: 'Depends on SLM-1042 isolation',
-    update: 'Pumps staged; electrical clearance is required before entry.',
-    steps: ['Site assessed', 'Pumping team allocated', 'Pumping and drain clearance', 'Access inspected'],
-    risk: 'Do not walk or drive through floodwater.'
-  },
-  {
-    id: 'SLM-1044',
-    title: 'Fallen tree blocking access',
-    place: 'Taramani Link Road',
-    type: 'Roads',
-    district: 'Chennai',
-    priority: 'High',
-    status: 'Assigned',
-    progress: 15,
-    crew: 5,
-    cost: 65000,
-    hours: 4,
-    owner: 'Road clearance team',
-    reason: 'Open an access corridor for response vehicles.',
-    dependency: 'Confirm nearby wires are isolated',
-    update: 'Tree-removal crew assigned; access inspection pending.',
-    steps: ['Obstruction reported', 'Crew assigned', 'Tree removal', 'Road reopened after inspection'],
-    risk: 'Keep away from unstable trees and overhead wires.'
-  }
+  {id:'SLM-1042',title:'Power line damage',place:'Velachery Main Road',district:'Chennai',locality:'Velachery',latitude:12.9815,longitude:80.2180,type:'Electricity',icon:'bolt',priority:'Critical',status:'In progress',progress:45,crew:8,cost:240000,hours:6,owner:'Electricity response team',reason:'Isolate electrical hazards before pumping or road clearance.',dependency:'Isolation clearance before SLM-1043',update:'Isolation completed; replacement pole and cable crew assigned.',steps:['Citizen report received','Electrical isolation confirmed','Replacement work in progress','Inspection and safe restoration'],risk:'Keep clear of fallen wires and flooded electrical equipment.'},
+  {id:'SLM-1043',title:'Waterlogging near homes',place:'Ram Nagar · Velachery',district:'Chennai',locality:'Velachery',latitude:12.9750,longitude:80.2210,type:'Drainage',icon:'water',priority:'High',status:'In progress',progress:30,crew:6,cost:180000,hours:8,owner:'Stormwater drainage team',reason:'Restore access to homes after electrical clearance.',dependency:'Depends on SLM-1042 isolation',update:'Pumps staged; electrical clearance is required before entry.',steps:['Site assessed','Pumping team allocated','Pumping and drain clearance','Access inspected'],risk:'Do not walk or drive through floodwater.'},
+  {id:'SLM-1044',title:'Fallen tree blocking access',place:'Taramani Link Road',district:'Chennai',locality:'Taramani',latitude:12.9860,longitude:80.2420,type:'Roads',icon:'tree',priority:'High',status:'Assigned',progress:15,crew:5,cost:65000,hours:4,owner:'Road clearance team',reason:'Open an access corridor for response vehicles.',dependency:'Confirm nearby wires are isolated',update:'Tree-removal crew assigned; access inspection pending.',steps:['Obstruction reported','Crew assigned','Tree removal','Road reopened after inspection'],risk:'Keep away from unstable trees and overhead wires.'},
+  {id:'SLM-1045',title:'Damaged mobile network tower',place:'Pallikaranai · service area',district:'Chennai',locality:'Pallikaranai',latitude:12.9350,longitude:80.2138,type:'Telecom',icon:'network',priority:'Medium',status:'Assessment',progress:5,crew:4,cost:320000,hours:18,owner:'Telecom restoration team',reason:'Restore communication after structure and access checks.',dependency:'Structural inspection required',update:'Structural review requested; temporary coverage plan pending.',steps:['Service loss logged','Structural assessment','Repair or temporary service','Coverage verified'],risk:'Stay outside the cordoned area.'},
+  {id:'SLM-1046',title:'Blocked roadside drain',place:'Vijaya Nagar · junction',district:'Chennai',locality:'Velachery',latitude:12.9790,longitude:80.2240,type:'Drainage',icon:'water',priority:'Medium',status:'Resolved',progress:100,crew:3,cost:45000,hours:3,owner:'Drainage maintenance team',reason:'Remove a local blockage and confirm drainage flow.',dependency:'No open dependencies',update:'Drain cleared and flow checked in this demonstration record.',steps:['Blockage logged','Crew assigned','Debris removed','Flow checked and closure recorded'],risk:'Avoid open drains; follow barriers at the work site.'},
+  {id:'SLM-2011',title:'Stormwater culvert siltation',place:'Anna Nagar 2nd Avenue',district:'Chennai',locality:'Anna Nagar',latitude:13.0850,longitude:80.2100,type:'Drainage',icon:'water',priority:'High',status:'In progress',progress:35,crew:6,cost:120000,hours:5,owner:'Corporation Stormwater Team',reason:'Clear trunk line before monsoon rains.',dependency:'No open dependencies',update:'Suction vehicle deployed; silt traps cleaned.',steps:['Report logged','Culvert inspection','Desilting underway','Flow verified'],risk:'Follow traffic diversion signs around work zones.'},
+  {id:'SLM-2021',title:'Lake bund overflow alert',place:'Singanallur Lake Bund Road',district:'Coimbatore',locality:'Singanallur',latitude:11.0016,longitude:77.0264,type:'Drainage',icon:'water',priority:'High',status:'In progress',progress:50,crew:8,cost:220000,hours:6,owner:'Coimbatore City Municipal Corp',reason:'Regulate surplus sluice to prevent roadway inundation.',dependency:'Sluice gate check completed',update:'Sandbag revetment reinforced along low-lying bund section.',steps:['Inundation alert logged','Sluice inspection','Bund revetment work','Water level stabilization'],risk:'Do not walk on lake embankments during high water.'},
+  {id:'SLM-2022',title:'Distribution pipeline rupture',place:'DB Road · RS Puram',district:'Coimbatore',locality:'RS Puram',latitude:11.0125,longitude:76.9480,type:'Drainage',icon:'water',priority:'Medium',status:'Assigned',progress:20,crew:5,cost:85000,hours:4,owner:'TWAD & City Water Division',reason:'Isolate burst line and bypass supply to residential blocks.',dependency:'Pumping isolation required',update:'Excavation permit approved; pipe replacement crew staged.',steps:['Leak reported','Valve isolated','Excavation and pipe join','Pressure test and road patch'],risk:'Avoid open excavation on DB Road.'},
+  {id:'SLM-2031',title:'Streetlight feeder pillar fault',place:'Goripalayam Riverfront Road',district:'Madurai',locality:'Goripalayam',latitude:9.9320,longitude:78.1310,type:'Electricity',icon:'bolt',priority:'High',status:'In progress',progress:60,crew:4,cost:95000,hours:3,owner:'TANGEDCO Urban Sub-division',reason:'Isolate short circuit near Vaigai riverbank footpath.',dependency:'Isolation confirmed',update:'Underground cable spliced; safety earthing re-tested.',steps:['Citizen report received','Pillar isolated','Cable splicing','Energisation check'],risk:'Do not touch damp streetlight pillars.'},
+  {id:'SLM-2032',title:'Bus terminal stormwater drain choke',place:'Mattuthavani Central Bus Stand',district:'Madurai',locality:'Mattuthavani',latitude:9.9485,longitude:78.1560,type:'Drainage',icon:'water',priority:'Medium',status:'Assessment',progress:10,crew:4,cost:60000,hours:4,owner:'Madurai Corporation Sanitation',reason:'Prevent terminal bay water accumulation during evening downpour.',dependency:'Awaiting vacuum desilter',update:'Field assessment completed; desilting scheduled tonight.',steps:['Grievance logged','Terminal bay inspected','Mechanical clearing scheduled','Inspection'],risk:'Caution: Slippery apron around bus bays.'},
+  {id:'SLM-2041',title:'Culvert erosion after rainfall',place:'Hasthampatti Main Road',district:'Salem',locality:'Hasthampatti',latitude:11.6750,longitude:78.1560,type:'Roads',icon:'tree',priority:'High',status:'In progress',progress:40,crew:6,cost:175000,hours:8,owner:'Salem Highways & Works',reason:'Restore shoulder support and culvert wing-wall.',dependency:'Traffic diversion implemented',update:'Gabion masonry retaining wall being placed.',steps:['Shoulder scour logged','Barricades erected','Retaining wall masonry','Resurfacing'],risk:'Heavy vehicles redirected via alternate bypass.'},
+  {id:'SLM-2051',title:'Temple road stormwater line desilting',place:'Srirangam North Chithirai St',district:'Tiruchirappalli',locality:'Srirangam',latitude:10.8624,longitude:78.6946,type:'Drainage',icon:'water',priority:'Medium',status:'Resolved',progress:100,crew:4,cost:52000,hours:4,owner:'Trichy Corporation Drainage Wing',reason:'Clear silt from underground chamber before festival procession.',dependency:'No open dependencies',update:'Complete desilting and chamber cover replacement finalized.',steps:['Blockage reported','Team dispatched','Chamber cleared','Flow certified'],risk:'Work completed; pedestrian flow restored.'},
+  {id:'SLM-2061',title:'Landslip mud clearance on ghat road',place:'Coonoor-Ooty Ghat KM 14',district:'Nilgiris',locality:'Ooty',latitude:11.4102,longitude:76.6950,type:'Roads',icon:'tree',priority:'Critical',status:'In progress',progress:70,crew:12,cost:340000,hours:5,owner:'State Highways Ghat Division',reason:'Clear road obstruction and stabilize uphill soil slope.',dependency:'Controlled single-lane traffic',update:'Excavator clearing debris; rock netting being installed.',steps:['Slope failure reported','Traffic halted','Debris clearing','Slope netting and reopening'],risk:'Extreme caution: Wet slippery slope; avoid night travel.'},
+  {id:'SLM-2071',title:'Coastal seawall boulder shift check',place:'Beach Promenade Road',district:'Kanniyakumari',locality:'Kanyakumari',latitude:8.0883,longitude:77.5385,type:'Roads',icon:'tree',priority:'Medium',status:'Assessment',progress:15,crew:4,cost:110000,hours:6,owner:'PWD Coastal Engineering',reason:'Check tetrapod and boulder armor displacement after high tide.',dependency:'Hydrographic report pending',update:'Initial visual survey completed; crane mobilization planned.',steps:['Displacement observed','Visual survey logged','Armor repositioning','Final inspection'],risk:'Stay off wet tetrapods and outer seawall slope.'}
 ];
 fs.writeFileSync(path.join(apiDir, 'issues.json'), JSON.stringify(issuesData, null, 2));
 

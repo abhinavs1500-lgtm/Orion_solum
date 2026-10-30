@@ -46,12 +46,14 @@ class Settings:
     ]
     
     # CORS
-    CORS_ORIGINS: List[str] = [
-        origin.strip() for origin in os.getenv(
-            "CORS_ORIGINS",
-            "http://localhost:8000,http://127.0.0.1:8000,http://localhost:3000"
-        ).split(",") if origin.strip()
-    ]
+    _cors_env = os.getenv("CORS_ORIGINS", "*")
+    if _cors_env.strip() == "*":
+        CORS_ORIGINS: List[str] = ["*"]
+    else:
+        CORS_ORIGINS: List[str] = [
+            origin.strip() for origin in _cors_env.split(",") if origin.strip()
+        ]
+
     
     # Cache
     CACHE_DEFAULT_TTL: int = 600  # 10 minutes
