@@ -1,1 +1,11 @@
-{"name":"solum-prototype","version":"1.0.0","private":true,"description":"SOLUM portable website prototype; no npm dependencies","scripts":{"dev":"python3 server.py --host 0.0.0.0 --port ${PORT:-8000}","check":"node --check assets/app.js && node --check assets/scene.js"}}
+{
+  "name": "solum-prototype",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SOLUM portable website prototype; zero npm dependencies",
+  "scripts": {
+    "build": "node ../build.js",
+    "dev": "python3 server.py --host 0.0.0.0 --port ${PORT:-8000}",
+    "check": "node --check assets/app.js && node --check assets/scene.js"
+  }
+}

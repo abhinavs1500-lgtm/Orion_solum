@@ -1,0 +1,73 @@
+# Netlify Configuration for SOLUM
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Clean URLs & Page Routing
+[[redirects]]
+  from = "/prepare"
+  to = "/prepare.html"
+  status = 200
+
+[[redirects]]
+  from = "/resolve"
+  to = "/resolve.html"
+  status = 200
+
+[[redirects]]
+  from = "/report"
+  to = "/report.html"
+  status = 200
+
+[[redirects]]
+  from = "/officials"
+  to = "/officials.html"
+  status = 200
+
+# Mock and Static API Endpoints
+[[redirects]]
+  from = "/api/maps/config"
+  to = "/api/maps/config.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/news"
+  to = "/api/news.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/issues"
+  to = "/api/issues.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/issues/stats"
+  to = "/api/issues/stats.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/officials/priorities"
+  to = "/api/officials/priorities.json"
+  status = 200
+
+[[redirects]]
+  from = "/api/officials/stats"
+  to = "/api/officials/stats.json"
+  status = 200
+
+# Security and Performance Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(self), camera=(), microphone=()"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

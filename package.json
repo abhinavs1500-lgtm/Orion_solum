@@ -1,0 +1,20 @@
+{
+  "name": "orion-solum",
+  "version": "1.0.0",
+  "description": "SOLUM — Data-Driven Decision Support & Google Maps 3D Platform",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "check": "node --check SOLUM/assets/app.js && node --check SOLUM/assets/scene.js",
+    "start": "python SOLUM/server.py"
+  },
+  "keywords": [
+    "solum",
+    "maps3d",
+    "geospatial",
+    "disaster-preparedness",
+    "tamil-nadu"
+  ],
+  "author": "SOLUM Team",
+  "license": "MIT"
+}
