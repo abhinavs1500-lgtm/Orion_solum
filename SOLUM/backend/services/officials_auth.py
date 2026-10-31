@@ -160,5 +160,12 @@ async def get_current_official(
         token = request.query_params.get("token")
         
     if not token:
-        raise HTTPException(status_code=401, detail="Official authentication required. Please log in to Officials Access.")
+        # Open access: No authentication required for official access
+        return {
+            "oid": "OFF-OPEN",
+            "name": "Civic Response Coordinator",
+            "role": "Municipal Coordination Lead",
+            "district": "All-TN",
+            "exp": time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(time.time() + TOKEN_VALIDITY_SECONDS))
+        }
     return verify_official_token(token)
