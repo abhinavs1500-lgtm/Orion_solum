@@ -234,12 +234,17 @@ async def create_issue_with_files(
 def get_prioritized_issues(
     district: Optional[str] = None,
     city: Optional[str] = None,
-    locality: Optional[str] = None
+    locality: Optional[str] = None,
+    status: Optional[str] = "all"
 ) -> List[IssueResponse]:
-    """Sort open issues: Life-safety -> critical dependencies -> access -> general restoration."""
-    open_issues = list_issues(status="open", district=district, city=city, locality=locality)
+    """Sort issues for the location: Life-safety -> dependencies -> access -> general restoration."""
+    issues_list = list_issues(status=status, district=district, city=city, locality=locality)
     priority_order = {"Critical": 0, "High": 1, "Medium": 2, "Unassessed": 3}
-    return sorted(open_issues, key=lambda x: priority_order.get(x.priority, 3))
+    def sort_key(x):
+        is_resolved = 1 if x.status == "Resolved" else 0
+        p_rank = priority_order.get(x.priority, 3)
+        return (is_resolved, p_rank)
+    return sorted(issues_list, key=sort_key)
 
 def get_official_dashboard_stats(
     district: Optional[str] = None,

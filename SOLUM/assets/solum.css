@@ -541,3 +541,66 @@ body{margin:0;background:var(--paper);color:var(--ink);font-size:15px}button,inp
   font-weight: 600;
 }
 
+/* ==========================================================================
+   OFFICIALS PROBLEMS & PROGRESS TRACKER WITH CHECKOUT BOX
+   ========================================================================== */
+.official-problem-card {
+  background: #ffffff;
+  border: 1px solid #dce8df;
+  border-radius: 14px;
+  padding: 16px 18px;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  position: relative;
+}
+.official-problem-card:hover {
+  border-color: #b8dcbf;
+  box-shadow: 0 4px 14px rgba(15, 122, 55, 0.06);
+}
+.official-problem-card.is-resolved {
+  background: #f8faf8;
+  border-color: #d2e4d6;
+}
+.official-problem-card.is-resolved .problem-card-title {
+  text-decoration: line-through;
+  color: #556b5c;
+}
+.official-checkout-box-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  user-select: none;
+  cursor: pointer;
+}
+.official-checkout-box {
+  width: 22px;
+  height: 22px;
+  accent-color: #0f7a37;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+.official-problem-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.official-progress-bar-wrap {
+  background: #e6eee8;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.official-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #16a34a, #0f7a37);
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+.official-progress-bar-fill.resolved {
+  background: #0f7a37;
+}
+
+

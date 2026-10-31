@@ -98,6 +98,7 @@ const issuesSeed=[
   {id:'SLM-2071',title:'Coastal seawall boulder shift check',place:'Beach Promenade Road',district:'Kanniyakumari',locality:'Kanyakumari',latitude:8.0883,longitude:77.5385,type:'Roads',icon:'tree',priority:'Medium',status:'Assessment',progress:15,crew:4,cost:110000,hours:6,owner:'PWD Coastal Engineering',reason:'Check tetrapod and boulder armor displacement after high tide.',dependency:'Hydrographic report pending',update:'Initial visual survey completed; crane mobilization planned.',steps:['Displacement observed','Visual survey logged','Armor repositioning','Final inspection'],risk:'Stay off wet tetrapods and outer seawall slope.'}
 ];
 let issues=store.get('issues',issuesSeed);
+let officialStatusFilter='all';
 function money(v){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(v)}
 function toast(msg){const e=$('#toast');if(!e)return;e.textContent=msg;e.classList.add('visible');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>e.classList.remove('visible'),5500)}
 function badge(txt,type=''){return `<span class="tag ${type}">${esc(txt)}</span>`}
@@ -117,7 +118,7 @@ const checklistData=[['Essentials at home','home',['Store drinking water and rea
 function prepare(){return `<main id="main">${pageHero('PREPARE · BEFORE A DISASTER','A little preparation.<br>A lot more peace of mind.','Understand your surroundings, explore possible impacts and turn awareness into a practical plan.')}<div class="wrap">${demoNote('Google Maps 3D active. Use timeline slider to simulate environmental impact progression over 24 hours.')}${mapMarkup()}</div><section class="section wrap" style="padding-top:35px"><div class="section-head"><div><span class="eyebrow plain">YOUR PREPARATION BRIEF</span><h2>What could this mean for you?</h2></div><span class="tag amber">Scenario guidance · grounded intelligence</span></div><div class="analysis-summary"><div class="metric"><span>SCENARIO PROFILE</span><b id="brief-scenario">${esc(locationData.name)}</b><span id="brief-coords">${locationData.lat.toFixed(3)}°N, ${locationData.lon.toFixed(3)}°E · ${esc(formatLocationDisplay(locationData))}</span></div><div class="metric"><span>SIMULATION STAGE</span><b id="brief-timing">Hour 0 · Baseline</b><span id="brief-stage">Normal weather & drainage capacity</span></div><div class="metric"><span>HAZARD EXPOSURE</span><b id="brief-exposure">All Corridors Open</b><span id="brief-advisory">Follow designated municipal evacuation routes</span></div></div><div class="card scenario-card" id="scenario-detail-card" style="margin-bottom:28px;"><div class="row-flex between" style="margin-bottom:14px;flex-wrap:wrap"><div><span class="eyebrow" id="sim-scenario-type">PHYSICS-GROUNDED SCENARIO</span><h3 id="sim-scenario-title" style="margin:8px 0 0;font-size:18px">Loading simulation…</h3></div><div id="sim-severity-badge"><span class="tag">Low Exposure</span></div></div><p id="sim-narrative" style="font-size:13px;line-height:1.55;color:#284333;margin-bottom:18px;">At Hour 0, surface runoff in the drainage basin is operating within standard municipal capacity.</p><div class="sim-metrics-grid" id="sim-metrics-grid"><div class="sim-metric-item"><small>Rainfall Accum.</small><b id="metric-rain">0 mm</b></div><div class="sim-metric-item"><small>Peak Wind Gust</small><b id="metric-wind">0 km/h</b></div><div class="sim-metric-item"><small>Soil Saturation</small><b id="metric-soil">0 %</b></div><div class="sim-metric-item"><small>Water Volume</small><b id="metric-vol">0 m³</b></div><div class="sim-metric-item"><small>Affected Area</small><b id="metric-area">0 km²</b></div></div><div class="grid-2" style="margin-top:20px;"><div><b style="font-size:12px;display:block;margin-bottom:8px;color:#10291e">INTERSECTING ARTERIAL CORRIDORS</b><div id="sim-roads-list" style="display:grid;gap:6px;"></div></div><div><b style="font-size:12px;display:block;margin-bottom:8px;color:#10291e">CRITICAL FACILITIES & UTILITIES AT RISK</b><div id="sim-facilities-list" style="display:grid;gap:6px;"></div></div></div><div class="subtle" id="sim-assumptions" style="margin-top:20px;font-size:11px;line-height:1.5;"><b>Model Assumptions & Data Grounding:</b> Evaluated on Copernicus DEM 30m terrain contours and India-WRIS hydrological distances. Not an operational disaster forecast; always follow official emergency instructions from civil defence authorities.</div></div><div class="grid-2">${checklistData.map((a,ix)=>`<div class="card action-card"><h3>${icon(a[1])} ${a[0]}</h3><ul class="checklist">${a[2].map((t,i)=>`<li><input type="checkbox" id="check-${ix}-${i}" data-check="${ix}-${i}"><label for="check-${ix}-${i}">${t}</label></li>`).join('')}</ul></div>`).join('')}</div><div class="grid-2" style="margin-top:22px"><div class="card"><h3>${icon('pin')} Movement & shelter</h3><p style="font-size:13px">Do not enter or drive through floodwater. If evacuation is directed, follow the route and shelter information from local authorities. A familiar road may no longer be safe.</p><a class="text-link" href="https://chennaicorporation.gov.in/" target="_blank" rel="noopener">Greater Chennai Corporation ${icon('arrow')}</a></div><div class="card"><h3>${icon('layers')} How land risk models work</h3><p style="font-size:13px">Validated rainfall forecasts, elevation, drainage, satellite observations and historical events inform the SOLUM geospatial due-diligence engine.</p><button class="text-link" data-action="sources" style="border:0;background:none;padding:0">See evidence & data gaps ${icon('arrow')}</button></div></div><p class="source-line">Preparedness guidance: <a href="https://mausam.imd.gov.in/chennai/mcdata/dos%26donts.pdf" target="_blank" rel="noopener">IMD Chennai — Floods: Dos and Don’ts</a>. Follow current instructions from local authorities.</p></section><section class="chat-section" style="background:#edf6ef"><div class="wrap"><span class="eyebrow">${icon('shield')} ASK SOLUM</span><h2 style="margin:15px 0 9px">A question today. More clarity tomorrow.</h2><p>Ask about preparation, supplies, routes or what the map means.</p><div class="chat-shell"><div class="chat-log" id="chat-log" aria-live="polite"><div class="bubble">Hello! I am your SOLUM Decision Support Guide. I can share source-linked preparedness guidance, safety precautions, and land assessment insights. What would you like to know?</div></div><form class="chat-form" id="chat-form"><input id="chat-input" aria-label="Ask a preparation question" placeholder="What should I keep in my emergency bag?" maxlength="500" required><button class="btn" type="submit">Ask ${icon('arrow')}</button></form><div class="suggestions"><button data-question="What should I pack?">Emergency bag</button><button data-question="Which route is safe?">Safe routes</button><button data-question="When will the flood arrive?">Flood timing</button><button data-question="What are your data sources?">Data sources</button></div></div></div></section></main>`}
 function resolve(){return `<main id="main">${pageHero('RESOLVE · AFTER A DISASTER','Recovery you can follow.','See what needs attention, understand the work underway and help bring overlooked problems into view.')}<section class="wrap" style="padding-bottom:70px"><div class="row-flex between" style="margin:16px 0;flex-wrap:wrap"><span class="small muted">${icon('pin')} Selected location: <b data-location-full>${esc(formatLocationDisplay(locationData))}</b></span><span class="tag gray" data-backend-status>Checking backend…</span></div>${demoNote('Civic repair records are stored in the persistent backend database. Complaints submitted here are saved with coordinates and media attachments.')}<div class="resolve-stats" id="resolve-stats"></div><div class="section-head"><h2 style="font-size:25px">Your neighbourhood, in progress.</h2><label class="small">Show <select id="issue-filter" style="padding:8px;border:1px solid #dce7df;border-radius:8px;margin-left:8px"><option value="all">All issues</option><option value="open">Open issues</option><option value="Resolved">Resolved</option><option value="Electricity">Electricity</option><option value="Drainage">Drainage</option><option value="Roads">Roads</option></select></label></div><div class="issues-layout"><div><div class="small muted" style="margin-bottom:12px">REPORTED PROBLEMS</div><div class="issue-list" id="issue-list"></div></div><article class="card issue-detail" id="issue-detail" aria-live="polite"></article></div><div class="complaint-cta"><div><h3>Something still needs attention?</h3><p>Share the problem, its location and supporting photos or videos.</p></div><button class="btn" data-action="complaint">Raise a Complaint ${icon('arrow')}</button></div><div class="subtle" style="margin-top:20px">${icon('shield')} Every issue has a verified ID, a responsible team, and a change history recorded in the database.</div></section></main>`}
 function report(){return `<main id="main">${pageHero('REPORT · BEFORE YOU BUILD','Understand the land.<br>Before you build on it.','A clearer starting point for homeowners, builders and planners — backed by geospatial terrain, water proximity & flood analysis.')}<section class="wrap section" style="padding-top:15px"><div class="card report-form"><form id="land-form"><h3>Start a land assessment</h3><p style="font-size:13px">Choose the site and proposed use. We’ll compute real terrain elevation, slope, and waterbody buffers across Tamil Nadu.</p><div class="field"><label for="land-address">Site / locality</label><input id="land-address" value="${esc(formatLocationDisplay(locationData))}" required maxlength="160" placeholder="Locality, district, state"></div><div class="form-grid"><div class="field"><label for="land-use">Proposed use</label><select id="land-use"><option>Individual home</option><option>Apartment building</option><option>Commercial building</option><option>Community facility</option></select></div><div class="field"><label for="land-area">Plot area (m²)</label><input type="number" min="1" max="10000000" id="land-area" value="240" required></div><div class="field"><label for="land-lat">Latitude</label><input id="land-lat" type="number" min="-90" max="90" step="any" value="${locationData.lat.toFixed(4)}" required></div><div class="field"><label for="land-lon">Longitude</label><input id="land-lon" type="number" min="-180" max="180" step="any" value="${locationData.lon.toFixed(4)}" required></div></div><button class="btn" type="submit">Compute land assessment ${icon('arrow')}</button><p class="source-line">Coordinates are evaluated with Copernicus DEM elevation, Shapely waterbody buffers, and Tamil Nadu regional hazard models.</p></form><div class="report-visual"><img src="assets/city.svg" alt="Illustrated land, buildings and water corridor"><h3 style="margin-top:16px">The whole place.<br>Not just the plot.</h3><p>Consider terrain, water, drainage, access and environmental constraints together. Missing evidence is a question to investigate, not a green light to build.</p></div></div><div class="report-result hidden" id="report-result" aria-live="polite"></div><div class="section-head" style="margin-top:55px"><div><span class="eyebrow plain">A BETTER STARTING POINT</span><h2 style="font-size:28px">Ask the questions that matter.</h2></div></div><div class="grid-3">${[['water','Water & drainage','Look beyond a plot boundary. Ask about flood history, drainage connectivity, water bodies and seasonal groundwater.'],['layers','Ground & terrain','Confirm levels, soil bearing capacity and slope conditions through appropriate surveys and engineering tests.'],['report','Rules & approvals','Verify land classification, access rights, setbacks and applicable environmental or coastal restrictions.']].map(a=>`<div class="card"><div class="feature-icon">${icon(a[0])}</div><h3>${a[1]}</h3><p style="font-size:13px;margin:0">${a[2]}</p></div>`).join('')}</div></section></main>`}
-function officials(){return `<main id="main">${pageHero('RESOLVE · OFFICIALS WORKSPACE','Coordinate the work.<br>Reconnect the city.','Municipal response dashboard: live priorities, resource allocation, and direct civic coordination across Tamil Nadu.')}<div class="wrap">${demoNote('Civic Coordination Workspace. Manage municipal priorities, resource allocation, and publish progress updates directly to the database.')}</div><section class="wrap section" id="official-workspace" style="padding-top:15px"><div class="row-flex between" style="margin-bottom:20px;flex-wrap:wrap"><div class="row-flex" style="gap:10px;align-items:center"><span class="tag" id="official-role-label">${icon('shield')} <b>Officials Workspace</b> · Open Access</span><span class="tag gray" data-backend-status>Checking backend…</span></div><button class="btn-soft" data-action="location" style="font-size:12px;padding:6px 14px">${icon('pin')} Switch Location</button></div><div class="official-stats-grid" id="official-stats-grid"></div><div class="officer-grid"><div class="card"><div class="row-flex between"><h3 style="margin:0">Suggested repair priorities</h3>${badge('DYNAMIC RANKING','amber')}</div><p style="font-size:12px;margin-top:12px">Life safety → service dependencies → access → restoration. Dynamically prioritized by the backend system.</p><div id="priority-list"></div></div><div class="card"><h3>Resources at a glance</h3><div class="field"><label for="available-funds">Available funds (₹)</label><input id="available-funds" type="number" min="0" max="1000000000" value="1000000"></div><div class="field"><label for="available-crew">Available crew members</label><input id="available-crew" type="number" min="0" max="10000" value="24"></div><div id="budget-summary"></div><button class="btn-soft" id="export-plan" style="margin-top:20px;width:100%">${icon('download')} Export resource plan</button><p class="source-line">Generates a structured recovery allocation plan via FastAPI backend.</p></div></div><div class="grid-2" style="margin-top:24px"><form class="card" id="publish-form"><h3>Share a progress update</h3><div class="field"><label for="update-issue">Issue</label><select id="update-issue"></select></div><div class="form-grid"><div class="field"><label for="update-status">Status</label><select id="update-status"><option>Assessment</option><option>Assigned</option><option>In progress</option><option>Resolved</option></select></div><div class="field"><label for="update-progress">Progress (%)</label><input id="update-progress" type="number" min="0" max="100" value="45" required></div></div><div class="form-grid"><div class="field"><label for="update-crew">Assigned crew members</label><input id="update-crew" type="number" min="0" max="10000" value="8" required></div><div class="field"><label for="update-cost">Estimated work cost (₹)</label><input id="update-cost" type="number" min="0" max="1000000000" value="240000" required></div><div class="field"><label for="update-hours">Estimated work hours</label><input id="update-hours" type="number" min="0" max="8760" value="6" required></div><div class="field"><label for="update-owner">Responsible team</label><input id="update-owner" maxlength="100" required></div></div><div class="field"><label for="update-note">Public update</label><textarea id="update-note" required maxlength="500" placeholder="What has been done? What happens next?"></textarea></div><button class="btn">Publish database update ${icon('arrow')}</button><p class="source-line">Updates sync immediately across all connected citizens.</p></form><div class="card"><h3>Prevent the next disruption</h3><div class="flow" style="grid-template-columns:1fr;margin:20px 0"><div class="subtle">1 · Isolate damaged electricity infrastructure.</div><div class="subtle">2 · Confirm clearance before pumping floodwater.</div><div class="subtle">3 · Clear priority access for response vehicles.</div><div class="subtle">4 · Inspect repairs before restoring services.</div></div><h3 style="font-size:15px">Database Audit History</h3><div id="audit-log" style="font-size:12px;color:#64766b"></div></div></div></section></main>`}
+function officials(){return `<main id="main">${pageHero('RESOLVE · OFFICIALS WORKSPACE','Coordinate the work.<br>Reconnect the city.','Municipal response dashboard: live priorities, resource allocation, and direct civic coordination across Tamil Nadu.')}<div class="wrap">${demoNote('Civic Coordination Workspace. Manage municipal priorities, resource allocation, and publish progress updates directly to the database.')}</div><section class="wrap section" id="official-workspace" style="padding-top:15px"><div class="row-flex between" style="margin-bottom:20px;flex-wrap:wrap"><div class="row-flex" style="gap:10px;align-items:center"><span class="tag" id="official-role-label">${icon('shield')} <b>Officials Workspace</b> · Open Access</span><span class="tag gray" data-backend-status>Checking backend…</span></div><button class="btn-soft" data-action="location" style="font-size:12px;padding:6px 14px">${icon('pin')} Switch Location</button></div><div class="official-stats-grid" id="official-stats-grid"></div><div class="officer-grid"><div class="card"><div class="row-flex between" style="flex-wrap:wrap;gap:10px"><div><h3 style="margin:0">Problems & Progress Tracker</h3><p style="font-size:12px;margin:4px 0 0;color:#64766b">Issues and field progress in <b data-location-full>${esc(formatLocationDisplay(locationData))}</b>. Use the checkout box for each problem.</p></div><div class="row-flex" style="gap:8px;flex-wrap:wrap">${badge('DYNAMIC RANKING','amber')}<div class="tabs" id="official-issue-filter" style="margin:0"><button class="${officialStatusFilter==='all'?'active':''}" data-status-filter="all">All</button><button class="${officialStatusFilter==='open'?'active':''}" data-status-filter="open">In Progress</button><button class="${officialStatusFilter==='Resolved'?'active':''}" data-status-filter="Resolved">Resolved</button></div></div></div><p style="font-size:12px;margin:12px 0 16px;color:#506457">Life safety → service dependencies → access → restoration. Check off completed items to update the city dashboard in real time.</p><div id="priority-list" style="display:grid;gap:14px"></div></div><div class="card"><h3>Resources at a glance</h3><div class="field"><label for="available-funds">Available funds (₹)</label><input id="available-funds" type="number" min="0" max="1000000000" value="1000000"></div><div class="field"><label for="available-crew">Available crew members</label><input id="available-crew" type="number" min="0" max="10000" value="24"></div><div id="budget-summary"></div><button class="btn-soft" id="export-plan" style="margin-top:20px;width:100%">${icon('download')} Export resource plan</button><p class="source-line">Generates a structured recovery allocation plan via FastAPI backend.</p></div></div><div class="grid-2" style="margin-top:24px"><form class="card" id="publish-form"><h3>Share a progress update</h3><div class="field"><label for="update-issue">Issue</label><select id="update-issue"></select></div><div class="form-grid"><div class="field"><label for="update-status">Status</label><select id="update-status"><option>Assessment</option><option>Assigned</option><option>In progress</option><option>Resolved</option></select></div><div class="field"><label for="update-progress">Progress (%)</label><input id="update-progress" type="number" min="0" max="100" value="45" required></div></div><div class="form-grid"><div class="field"><label for="update-crew">Assigned crew members</label><input id="update-crew" type="number" min="0" max="10000" value="8" required></div><div class="field"><label for="update-cost">Estimated work cost (₹)</label><input id="update-cost" type="number" min="0" max="1000000000" value="240000" required></div><div class="field"><label for="update-hours">Estimated work hours</label><input id="update-hours" type="number" min="0" max="8760" value="6" required></div><div class="field"><label for="update-owner">Responsible team</label><input id="update-owner" maxlength="100" required></div></div><div class="field"><label for="update-note">Public update</label><textarea id="update-note" required maxlength="500" placeholder="What has been done? What happens next?"></textarea></div><button class="btn">Publish database update ${icon('arrow')}</button><p class="source-line">Updates sync immediately across all connected citizens.</p></form><div class="card"><h3>Prevent the next disruption</h3><div class="flow" style="grid-template-columns:1fr;margin:20px 0"><div class="subtle">1 · Isolate damaged electricity infrastructure.</div><div class="subtle">2 · Confirm clearance before pumping floodwater.</div><div class="subtle">3 · Clear priority access for response vehicles.</div><div class="subtle">4 · Inspect repairs before restoring services.</div></div><h3 style="font-size:15px">Database Audit History</h3><div id="audit-log" style="font-size:12px;color:#64766b"></div></div></div></section></main>`}
 function dialogs(){return `<dialog id="location-dialog"><div class="dialog-head"><h2>Start with your location.</h2><button data-close aria-label="Close location dialog">×</button></div><p style="font-size:13px">Use device GPS, search any Tamil Nadu city or locality, or enter direct coordinates.</p><button class="btn-soft" id="use-location" style="width:100%">${icon('pin')} Use my current location</button><form id="location-search-form" style="margin-top:16px"><div class="field"><label for="location-query">Search Tamil Nadu (City, District or Lat/Lon)</label><input id="location-query" placeholder="e.g. Ooty, Madurai, or 11.41, 76.69" required minlength="2" maxlength="100"></div><button class="btn" type="submit">Search ${icon('search')}</button></form><div class="tn-pills-wrap"><div class="tn-pills-title">Tamil Nadu Quick Select:</div><div class="tn-pills">${['Chennai','Coimbatore','Madurai','Tiruchirappalli','Salem','Tirunelveli','Vellore','Erode','Thanjavur','Tiruppur','Hosur','Kanchipuram','Chengalpattu','Ooty','Kodaikanal','Nagercoil','Cuddalore'].map(c=>`<button type="button" class="tn-pill-btn" data-tn-city="${c}">${c}</button>`).join('')}</div></div><div id="location-results" class="location-results" aria-live="polite"></div><button class="text-link" id="chennai-default" style="background:none;border:0;padding:6px 0 0">Use Chennai example</button></dialog>
 <dialog id="complaint-dialog"><div class="dialog-head"><h2>Raise a Complaint</h2><button data-close aria-label="Close complaint dialog">×</button></div><div id="complaint-form-wrap"><p style="font-size:13px">Civic ticket submission — saved to SOLUM database with coordinates and photos.</p><form id="complaint-form"><div class="field"><label for="complaint-subject">Subject</label><input id="complaint-subject" required maxlength="100" placeholder="e.g. Fallen tree blocking our street"></div><div class="form-grid"><div class="field"><label for="complaint-category">Category</label><select id="complaint-category"><option>Roads</option><option>Electricity</option><option>Drainage</option><option>Telecom</option><option>Other</option></select></div><div class="field"><label for="complaint-place">Location / landmark</label><input id="complaint-place" required maxlength="160" placeholder="Street, locality, landmark"></div></div><div class="field"><label for="complaint-description">Description</label><textarea id="complaint-description" required minlength="10" maxlength="1000" placeholder="Describe the problem and who is affected."></textarea></div><div class="field"><label for="complaint-evidence">Photos or videos (optional)</label><input id="complaint-evidence" type="file" accept="image/*,video/*" multiple><small>Up to 3 files, 10 MB each. Uploaded securely to backend storage.</small></div><div class="media-preview" id="media-preview"></div><button class="btn" type="submit" style="margin-top:15px">Submit complaint ${icon('arrow')}</button></form></div><div id="complaint-success" class="hidden"></div></dialog>
 <dialog id="backend-dialog"><div class="dialog-head"><h2>Connect Production Backend</h2><button data-close aria-label="Close dialog">×</button></div><p style="font-size:13px;line-height:1.5;color:#284333">Connect your deployed SOLUM FastAPI backend (e.g. hosted on Render, Railway or Cloud Run) to enable persistent SQLite database storage, authorized officials operations, and AI assistance.</p><form id="backend-connect-form" style="margin-top:16px"><div class="field"><label for="backend-url-input">FastAPI Backend URL</label><input id="backend-url-input" placeholder="https://solum-backend.onrender.com" value="${esc(API_BASE)}" style="width:100%"><small style="color:#64766b;display:block;margin-top:6px">Must be an active public HTTPS service URL running SOLUM's FastAPI application.</small></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn" type="submit" style="flex:1">Test & Save Connection</button><button class="btn-ghost" type="button" id="backend-reset-btn">Reset</button></div><div id="backend-test-result" style="margin-top:12px;font-size:12px;" aria-live="polite"></div></form><div class="subtle" style="margin-top:20px;font-size:12px"><b>Need to host the backend?</b> Use the included <code>render.yaml</code> or <code>Procfile</code> in your GitHub repository to deploy to Render or Railway with 1 click.</div></dialog>
@@ -1823,36 +1824,175 @@ async function renderOfficial(){
     console.warn('Official stats fetch note:', e);
   }
 
-  // 2. Fetch Location-Scoped Prioritized Issues
-  let priorities=[];
+  // 2. Fetch Location-Scoped Issues & Priorities
+  let priorities = [];
   try{
-    const prioUrl = `/api/officials/priorities?district=${encodeURIComponent(targetDistrict)}${targetLocality ? '&locality=' + encodeURIComponent(targetLocality) : ''}`;
+    const prioUrl = `/api/officials/priorities?district=${encodeURIComponent(targetDistrict)}${targetLocality ? '&locality=' + encodeURIComponent(targetLocality) : ''}&status=${encodeURIComponent(officialStatusFilter)}`;
     priorities = await api(prioUrl);
   }catch(e){
-    const ranks={Critical:0,High:1,Medium:2,Unassessed:3};
-    priorities=issues.filter(i=>i.status!=='Resolved').sort((a,b)=>(ranks[a.priority]??3)-(ranks[b.priority]??3));
+    const ranks = {Critical: 0, High: 1, Medium: 2, Unassessed: 3};
+    let locIssues = issues.filter(i => {
+      const matchDist = !targetDistrict || (i.district && i.district.toLowerCase() === targetDistrict.toLowerCase()) || (i.place && i.place.toLowerCase().includes(targetDistrict.toLowerCase()));
+      const matchLoc = !targetLocality || (i.locality && i.locality.toLowerCase().includes(targetLocality.toLowerCase())) || (i.place && i.place.toLowerCase().includes(targetLocality.toLowerCase()));
+      return matchDist && matchLoc;
+    });
+    if(!locIssues.length) locIssues = issues;
+    if(officialStatusFilter === 'open'){
+      locIssues = locIssues.filter(i => i.status !== 'Resolved');
+    }else if(officialStatusFilter === 'Resolved'){
+      locIssues = locIssues.filter(i => i.status === 'Resolved');
+    }
+    priorities = locIssues.sort((a,b) => {
+      const aRes = a.status === 'Resolved' ? 1 : 0;
+      const bRes = b.status === 'Resolved' ? 1 : 0;
+      if(aRes !== bRes) return aRes - bRes;
+      return (ranks[a.priority] ?? 3) - (ranks[b.priority] ?? 3);
+    });
   }
 
   const pList = $('#priority-list');
   if(pList){
     if(!priorities.length){
-      pList.innerHTML = `<div class="subtle" style="padding:16px 0;text-align:center">No active repair priorities recorded for <b>${esc(targetDistrict)}</b>. All civic systems operating nominally.</div>`;
+      pList.innerHTML = `<div class="subtle" style="padding:24px 0;text-align:center;background:#f8faf8;border-radius:12px;border:1px dashed #dce8df">No ${officialStatusFilter === 'Resolved' ? 'resolved' : officialStatusFilter === 'open' ? 'active' : ''} problems recorded for <b>${esc(targetDistrict)}</b>. All civic systems operating nominally.</div>`;
     }else{
-      pList.innerHTML = priorities.map((i,n)=>`
-        <div class="priority-row">
-          <span class="rank">${n+1}</span>
-          <div>
-            <b>${esc(i.title)}</b>
-            <p>${esc(i.reason)}</p>
-            <small style="color:#0f7a37;font-weight:600">${esc(i.locality || i.district || targetDistrict)} · ${esc(i.place || '')}</small>
-            <br><small style="color:#64766b">${esc(i.dependency || 'No pending dependencies')}</small>
+      pList.innerHTML = priorities.map((i,n)=>{
+        const isResolved = i.status === 'Resolved';
+        return `
+          <div class="official-problem-card ${isResolved ? 'is-resolved' : ''}" data-id="${esc(i.id)}">
+            <div class="official-problem-header">
+              <div style="display:flex;align-items:flex-start;gap:12px;flex:1">
+                <label class="official-checkout-box-wrap" title="${isResolved ? 'Click to reopen / mark in progress' : 'Click to checkout / mark resolved'}">
+                  <input type="checkbox" class="official-checkout-box" data-issue-id="${esc(i.id)}" ${isResolved ? 'checked' : ''} aria-label="Checkout ${esc(i.title)}">
+                </label>
+                <div style="flex:1">
+                  <div class="row-flex" style="gap:8px;align-items:center;flex-wrap:wrap">
+                    <span class="rank" style="font-size:11px;width:22px;height:22px;line-height:22px;display:inline-grid;place-items:center;border-radius:50%;background:#eaf5ed;color:#0f7a37;font-weight:700">${n+1}</span>
+                    <b class="problem-card-title" style="font-size:15px;color:#112017">${esc(i.title)}</b>
+                    <span class="tag gray" style="font-size:10px">${esc(i.id)}</span>
+                    ${badge(i.type || 'Civic', '')}
+                  </div>
+                  <div style="font-size:12px;color:#0f7a37;font-weight:600;margin-top:4px">
+                    ${icon('pin')} ${esc(i.place || i.locality || targetDistrict)} · ${esc(i.district || targetDistrict)}
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+                ${badge(i.priority, i.priority==='Critical'?'red':i.priority==='High'?'amber':'gray')}
+                ${badge(i.status, isResolved ? '' : 'amber')}
+              </div>
+            </div>
+
+            <!-- Problem Details & Root Cause -->
+            <div style="margin:12px 0 10px;padding:10px 12px;background:#f8faf8;border-radius:8px;border:1px solid #e7efe9">
+              <div style="font-size:12.5px;color:#284333;line-height:1.5">
+                <b style="color:#10291e">Problem Context & Need:</b> ${esc(i.reason || 'Municipal civic disruption requiring field intervention.')}
+              </div>
+              ${i.risk ? `<div style="font-size:11.5px;color:#991b1b;margin-top:6px;background:#fef2f2;border:1px solid #fee2e2;padding:5px 8px;border-radius:6px"><b>Hazard Risk:</b> ${esc(i.risk)}</div>` : ''}
+              ${i.dependency && i.dependency !== 'No pending dependencies' && i.dependency !== 'No open dependencies' ? `<div style="font-size:11.5px;color:#854d0e;margin-top:6px;background:#fefce8;border:1px solid #fef08a;padding:5px 8px;border-radius:6px"><b>Pre-condition / Dependency:</b> ${esc(i.dependency)}</div>` : ''}
+            </div>
+
+            <!-- Repair Progress & Timeline -->
+            <div style="margin-top:10px">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:4px">
+                <span style="font-weight:700;color:#10291e">Field Progress Tracker</span>
+                <span style="font-weight:700;color:${isResolved ? '#0f7a37' : '#0284c7'}">${i.progress}% · ${esc(i.status)}</span>
+              </div>
+              <div class="official-progress-bar-wrap">
+                <div class="official-progress-bar-fill ${isResolved ? 'resolved' : ''}" style="width:${i.progress}%"></div>
+              </div>
+              <div style="font-size:11.5px;color:#506457;margin-top:6px;line-height:1.4">
+                <b>Latest Field Dispatch Note:</b> <i>“${esc(i.update || 'Crews dispatched to site.')}”</i>
+              </div>
+              ${i.steps && i.steps.length ? `
+                <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+                  ${i.steps.map(step => `<span class="tag ${isResolved ? '' : 'gray'}" style="font-size:10px">${isResolved ? '✓' : '•'} ${esc(step)}</span>`).join('')}
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Field Logistics Footer -->
+            <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:12px;padding-top:10px;border-top:1px dashed #dce8df;font-size:11.5px;color:#64766b">
+              <span><b>Team:</b> ${esc(i.owner || 'Municipal Works')}</span>
+              <span><b>Crew:</b> ${i.crew ? i.crew + ' personnel' : 'Unassigned'}</span>
+              <span><b>Est. Cost:</b> ${money(i.cost || 0)}</span>
+              <span><b>Est. Hours:</b> ${i.hours || 0} hrs</span>
+              <button type="button" class="text-link quick-edit-issue-btn" data-edit-id="${esc(i.id)}" style="margin-left:auto;border:none;background:none;cursor:pointer;font-size:11px;font-weight:700">Update details ✎</button>
+            </div>
           </div>
-          <div style="text-align:right">
-            ${badge(i.priority, i.priority==='Critical'?'red':i.priority==='High'?'amber':'gray')}
-            <p style="margin:4px 0 0;font-size:11px">${i.crew?i.crew+' crew':'Unassigned'}</p>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+
+      // Wire up checkout checkboxes
+      $$('.official-checkout-box').forEach(box => {
+        box.onchange = async (e) => {
+          e.stopPropagation();
+          const issueId = box.dataset.issueId;
+          const willBeResolved = box.checked;
+          const newStatus = willBeResolved ? 'Resolved' : 'In progress';
+          const newProgress = willBeResolved ? 100 : 45;
+          const note = willBeResolved 
+            ? `Work verified completed and checked out by Municipal Official for ${targetDistrict}.` 
+            : `Re-opened by Municipal Official for further field inspection in ${targetDistrict}.`;
+          
+          const idx = issues.findIndex(x => x.id === issueId);
+          let issueObj = null;
+          if(idx !== -1){
+            issues[idx].status = newStatus;
+            issues[idx].progress = newProgress;
+            issues[idx].update = note;
+            issueObj = issues[idx];
+            store.set('issues', issues);
+          }
+
+          try{
+            await api('/api/officials/updates', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                issue_id: issueId,
+                status: newStatus,
+                progress: newProgress,
+                note: note,
+                crew: issueObj ? issueObj.crew : 4,
+                cost: issueObj ? issueObj.cost : 50000,
+                hours: issueObj ? issueObj.hours : 4,
+                owner: issueObj ? issueObj.owner : 'Municipal Coordination Team',
+                actor_role: 'Municipal Coordination Lead'
+              }),
+              timeoutMs: 5000
+            });
+          }catch(err){
+            console.warn('Backend checkout update note:', err);
+          }
+
+          const logs = store.get('audit', []);
+          logs.unshift({
+            id: 'AUD-' + Date.now().toString().slice(-6),
+            issue_id: issueId,
+            status: newStatus,
+            note: note,
+            created_at: new Date().toISOString(),
+            actor_role: 'Municipal Coordination Lead'
+          });
+          store.set('audit', logs);
+
+          toast(`${issueId} marked as ${newStatus} ✓`);
+          renderOfficial();
+        };
+      });
+
+      // Wire up quick edit buttons
+      $$('.quick-edit-issue-btn').forEach(btn => {
+        btn.onclick = () => {
+          const id = btn.dataset.editId;
+          const sel = $('#update-issue');
+          if(sel){
+            sel.value = id;
+            syncUpdateFields();
+            $('#publish-form')?.scrollIntoView({ behavior: 'smooth' });
+          }
+        };
+      });
     }
   }
 
@@ -1895,6 +2035,15 @@ async function renderAudit(){
 
 function initOfficial(){
   renderOfficial();
+
+  // Wire status filter tabs
+  $$('#official-issue-filter button').forEach(btn => {
+    btn.onclick = () => {
+      officialStatusFilter = btn.dataset.statusFilter;
+      $$('#official-issue-filter button').forEach(b => b.classList.toggle('active', b === btn));
+      renderOfficial();
+    };
+  });
 
   $('#available-funds').oninput = updateBudget;
   $('#available-crew').oninput = updateBudget;

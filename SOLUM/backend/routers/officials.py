@@ -48,10 +48,11 @@ def verify_session(official: Dict[str, Any] = Depends(get_current_official)):
 def get_priorities(
     district: Optional[str] = Query(None, description="Filter priorities by district"),
     city: Optional[str] = Query(None, description="Filter priorities by city"),
-    locality: Optional[str] = Query(None, description="Filter priorities by locality")
+    locality: Optional[str] = Query(None, description="Filter priorities by locality"),
+    status: Optional[str] = Query("all", description="Filter by status ('all', 'open', 'Resolved')")
 ):
-    """Returns dynamically ranked open issues for the selected location."""
-    return get_prioritized_issues(district=district, city=city, locality=locality)
+    """Returns dynamically ranked issues for the selected location."""
+    return get_prioritized_issues(district=district, city=city, locality=locality, status=status)
 
 @router.get("/stats", response_model=OfficialStatsResponse)
 def get_stats(
