@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: solum-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python SOLUM/server.py --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: GOOGLE_MAPS_API_KEY
+        value: AIzaSyAOWcDHEha2UfkgMVCRou4YKTNLIswN8BE

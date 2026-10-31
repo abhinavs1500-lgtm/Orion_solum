@@ -54,12 +54,17 @@ function copyRecursiveSync(src, dest) {
 
 // 3. Copy Web Pages and Assets
 console.log('\n[3/5] Bundling HTML pages and static assets...');
+const backendUrl = (process.env.BACKEND_URL || process.env.SOLUM_API_BASE || '').trim().replace(/\/+$/, '');
 const pages = ['index.html', 'prepare.html', 'resolve.html', 'report.html', 'officials.html'];
 pages.forEach((p) => {
   const src = path.join(solumDir, p);
   if (fs.existsSync(src)) {
-    fs.copyFileSync(src, path.join(distDir, p));
-    console.log(` [OK] Bundled ${p}`);
+    let content = fs.readFileSync(src, 'utf8');
+    if (backendUrl) {
+      content = content.replace('</head>', `<script>window.SOLUM_API_BASE = ${JSON.stringify(backendUrl)};</script>\n</head>`);
+    }
+    fs.writeFileSync(path.join(distDir, p), content, 'utf8');
+    console.log(` [OK] Bundled ${p}${backendUrl ? ' (injected SOLUM_API_BASE)' : ''}`);
   }
 });
 
@@ -86,6 +91,13 @@ const mapsConfig = {
   default_range: 1200.0
 };
 fs.writeFileSync(path.join(apiDir, 'maps', 'config.json'), JSON.stringify(mapsConfig, null, 2));
+
+const appConfig = {
+  api_base: backendUrl,
+  google_maps_api_key: googleMapsApiKey,
+  status: "configured"
+};
+fs.writeFileSync(path.join(apiDir, 'config.json'), JSON.stringify(appConfig, null, 2));
 
 // Seeded news fallback
 const newsData = {

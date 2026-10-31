@@ -28,17 +28,17 @@ class Settings:
     SOLUM_ROOT: Path = SOLUM_ROOT
     
     # Server
-    HOST: str = os.getenv("HOST", "127.0.0.1")
+    HOST: str = os.getenv("HOST", "0.0.0.0" if os.getenv("PORT") else "127.0.0.1")
     PORT: int = int(os.getenv("PORT", "8000"))
     
     # Google Maps Platform
-    GOOGLE_MAPS_API_KEY: str = os.getenv("GOOGLE_MAPS_API_KEY", "")
+    GOOGLE_MAPS_API_KEY: str = os.getenv("GOOGLE_MAPS_API_KEY", "AIzaSyAOWcDHEha2UfkgMVCRou4YKTNLIswN8BE")
     
-    # Database
-    DATABASE_PATH: Path = SOLUM_ROOT / "solum.db"
+    # Database (supports persistent mounted storage on cloud hosts)
+    DATABASE_PATH: Path = Path(os.getenv("DATABASE_PATH", str(SOLUM_ROOT / "solum.db")))
     
-    # File Storage
-    UPLOAD_DIR: Path = SOLUM_ROOT / "uploads"
+    # File Storage (supports persistent uploads volume on cloud hosts)
+    UPLOAD_DIR: Path = Path(os.getenv("UPLOAD_DIR", str(SOLUM_ROOT / "uploads")))
     MAX_UPLOAD_SIZE_BYTES: int = 10 * 1024 * 1024  # 10 MB
     ALLOWED_MIME_TYPES: List[str] = [
         "image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml",

@@ -53,11 +53,12 @@ function formatShortLocation(loc){
   return loc.locality||loc.name||'Tamil Nadu';
 }
 
-const API_BASE = (
+let API_BASE = (
   window.SOLUM_API_BASE || 
   localStorage.getItem('SOLUM_API_BASE') || 
   ''
 ).replace(/\/+$/, '');
+let backendConnected = false;
 
 const TN_CITIES = {
   'Chennai': {name: 'Chennai', district: 'Chennai', locality: 'Chennai', state: 'Tamil Nadu', country: 'India', lat: 13.0827, lon: 80.2707, mode: 'Selected city'},
@@ -114,10 +115,12 @@ function home(){return `<main id="main"><section class="home-intro"><div class="
 function mapMarkup(){return `<div class="map-panel"><div id="gmp-3d-wrap" style="position:absolute;inset:0;width:100%;height:100%;display:none;z-index:1;"><div id="google-map-3d" style="width:100%;height:100%;position:absolute;inset:0;display:block;"></div><div id="google-map" style="width:100%;height:100%;position:absolute;inset:0;display:none;"></div><div id="map-notice-banner" class="map-notice-banner hidden"></div></div><canvas id="map-canvas" class="map-canvas" aria-label="Illustrative neighbourhood model. Drag to rotate." tabindex="0"></canvas><div class="map-image" id="satellite-layer"><img id="satellite-image" alt="Satellite basemap imagery for the selected location"><div class="image-error hidden" id="satellite-error">Satellite imagery could not load. Check your connection or return to 3D view.</div><div class="map-attribution">Google Maps Platform · Satellite 3D Context</div></div><div class="map-top"><div><b id="map-title">${esc(locationData.name)} · Photorealistic 3D</b><small id="map-subtitle">Google Maps 3D Platform · True satellite imagery & 3D buildings</small></div><div>${badge('GOOGLE MAPS 3D','amber')}<small id="map-mode-indicator">Photorealistic 3D</small></div></div><div class="map-layer-toggles"><label title="Toggle Rivers & Water Bodies"><input type="checkbox" id="layer-water" checked> Water Bodies</label><label title="Toggle 100m Flood Buffer Catchment"><input type="checkbox" id="layer-flood" checked> Flood Buffers</label><label title="Toggle 3D Perspective Tilt"><input type="checkbox" id="layer-tilt" checked> 3D Tilt</label><label title="Toggle Civic Repair Issues"><input type="checkbox" id="layer-issues" checked> Civic Issues</label></div><div class="map-zoom"><button data-zoom="in" aria-label="Zoom in">+</button><button data-zoom="out" aria-label="Zoom out">−</button><button data-zoom="tilt" aria-label="Toggle camera tilt">📐</button><button data-zoom="rotate" aria-label="Orbit / Rotate camera">↻</button><button data-zoom="orbit" aria-label="360° Cinematic Orbit" title="360° Cinematic Orbit">🌐</button><button data-zoom="reset" aria-label="Reset view">↺</button></div><div class="map-legend"><span><i class="legend-dot" style="background:#0ea5e9"></i>Water Bodies</span><span><i class="legend-dot" style="background:#f59e0b"></i>100m Buffer</span><span><i class="legend-dot" style="background:#ef4444"></i>Civic Issue</span></div><div class="map-modes" aria-label="Map display"><button class="active" data-map-mode="3d">3D view</button><button data-map-mode="2d">2D view</button><button data-map-mode="satellite">Satellite</button><button data-map-mode="water">Water bodies</button></div></div><div class="timeline-bar"><div class="timeline-top-row"><div><b style="font-size:12px;color:#112017">Scenario Simulation:</b> <span id="scenario-sub-title" style="font-size:11px;color:#5d7566">Physics-grounded environmental projection</span></div><div class="scenario-pills" id="scenario-pills"></div></div><div class="timeline-slider-row"><span>Now</span><input type="range" id="scenario-time" min="0" max="24" value="0" step="1"><span>+24h</span><b class="tag gray" id="scenario-label">Hour 0 · Baseline</b><button class="icon-btn" id="map-motion" aria-label="Play scenario simulation" title="Play / Pause simulation">▶</button><button class="icon-btn" id="scenario-reset" aria-label="Reset simulation" title="Reset to Hour 0">↺</button></div></div>`}
 const checklistData=[['Essentials at home','home',['Store drinking water and ready-to-eat food.','Keep medicines, a first-aid kit and personal care items together.','Charge phones and power banks; keep a torch ready.','Put identity documents and essentials in waterproof bags.']],['A plan for everyone','people',['Agree on a family contact and a meeting place.','Plan assistance for children, older adults and people with disabilities.','Include pets and their supplies in your plan.','Check official notices before leaving; avoid flooded roads.']]];
 function prepare(){return `<main id="main">${pageHero('PREPARE · BEFORE A DISASTER','A little preparation.<br>A lot more peace of mind.','Understand your surroundings, explore possible impacts and turn awareness into a practical plan.')}<div class="wrap">${demoNote('Google Maps 3D active. Use timeline slider to simulate environmental impact progression over 24 hours.')}${mapMarkup()}</div><section class="section wrap" style="padding-top:35px"><div class="section-head"><div><span class="eyebrow plain">YOUR PREPARATION BRIEF</span><h2>What could this mean for you?</h2></div><span class="tag amber">Scenario guidance · grounded intelligence</span></div><div class="analysis-summary"><div class="metric"><span>SCENARIO PROFILE</span><b id="brief-scenario">${esc(locationData.name)}</b><span id="brief-coords">${locationData.lat.toFixed(3)}°N, ${locationData.lon.toFixed(3)}°E · ${esc(formatLocationDisplay(locationData))}</span></div><div class="metric"><span>SIMULATION STAGE</span><b id="brief-timing">Hour 0 · Baseline</b><span id="brief-stage">Normal weather & drainage capacity</span></div><div class="metric"><span>HAZARD EXPOSURE</span><b id="brief-exposure">All Corridors Open</b><span id="brief-advisory">Follow designated municipal evacuation routes</span></div></div><div class="card scenario-card" id="scenario-detail-card" style="margin-bottom:28px;"><div class="row-flex between" style="margin-bottom:14px;flex-wrap:wrap"><div><span class="eyebrow" id="sim-scenario-type">PHYSICS-GROUNDED SCENARIO</span><h3 id="sim-scenario-title" style="margin:8px 0 0;font-size:18px">Loading simulation…</h3></div><div id="sim-severity-badge"><span class="tag">Low Exposure</span></div></div><p id="sim-narrative" style="font-size:13px;line-height:1.55;color:#284333;margin-bottom:18px;">At Hour 0, surface runoff in the drainage basin is operating within standard municipal capacity.</p><div class="sim-metrics-grid" id="sim-metrics-grid"><div class="sim-metric-item"><small>Rainfall Accum.</small><b id="metric-rain">0 mm</b></div><div class="sim-metric-item"><small>Peak Wind Gust</small><b id="metric-wind">0 km/h</b></div><div class="sim-metric-item"><small>Soil Saturation</small><b id="metric-soil">0 %</b></div><div class="sim-metric-item"><small>Water Volume</small><b id="metric-vol">0 m³</b></div><div class="sim-metric-item"><small>Affected Area</small><b id="metric-area">0 km²</b></div></div><div class="grid-2" style="margin-top:20px;"><div><b style="font-size:12px;display:block;margin-bottom:8px;color:#10291e">INTERSECTING ARTERIAL CORRIDORS</b><div id="sim-roads-list" style="display:grid;gap:6px;"></div></div><div><b style="font-size:12px;display:block;margin-bottom:8px;color:#10291e">CRITICAL FACILITIES & UTILITIES AT RISK</b><div id="sim-facilities-list" style="display:grid;gap:6px;"></div></div></div><div class="subtle" id="sim-assumptions" style="margin-top:20px;font-size:11px;line-height:1.5;"><b>Model Assumptions & Data Grounding:</b> Evaluated on Copernicus DEM 30m terrain contours and India-WRIS hydrological distances. Not an operational disaster forecast; always follow official emergency instructions from civil defence authorities.</div></div><div class="grid-2">${checklistData.map((a,ix)=>`<div class="card action-card"><h3>${icon(a[1])} ${a[0]}</h3><ul class="checklist">${a[2].map((t,i)=>`<li><input type="checkbox" id="check-${ix}-${i}" data-check="${ix}-${i}"><label for="check-${ix}-${i}">${t}</label></li>`).join('')}</ul></div>`).join('')}</div><div class="grid-2" style="margin-top:22px"><div class="card"><h3>${icon('pin')} Movement & shelter</h3><p style="font-size:13px">Do not enter or drive through floodwater. If evacuation is directed, follow the route and shelter information from local authorities. A familiar road may no longer be safe.</p><a class="text-link" href="https://chennaicorporation.gov.in/" target="_blank" rel="noopener">Greater Chennai Corporation ${icon('arrow')}</a></div><div class="card"><h3>${icon('layers')} How land risk models work</h3><p style="font-size:13px">Validated rainfall forecasts, elevation, drainage, satellite observations and historical events inform the SOLUM geospatial due-diligence engine.</p><button class="text-link" data-action="sources" style="border:0;background:none;padding:0">See evidence & data gaps ${icon('arrow')}</button></div></div><p class="source-line">Preparedness guidance: <a href="https://mausam.imd.gov.in/chennai/mcdata/dos%26donts.pdf" target="_blank" rel="noopener">IMD Chennai — Floods: Dos and Don’ts</a>. Follow current instructions from local authorities.</p></section><section class="chat-section" style="background:#edf6ef"><div class="wrap"><span class="eyebrow">${icon('shield')} ASK SOLUM</span><h2 style="margin:15px 0 9px">A question today. More clarity tomorrow.</h2><p>Ask about preparation, supplies, routes or what the map means.</p><div class="chat-shell"><div class="chat-log" id="chat-log" aria-live="polite"><div class="bubble">Hello! I am your SOLUM Decision Support Guide. I can share source-linked preparedness guidance, safety precautions, and land assessment insights. What would you like to know?</div></div><form class="chat-form" id="chat-form"><input id="chat-input" aria-label="Ask a preparation question" placeholder="What should I keep in my emergency bag?" maxlength="500" required><button class="btn" type="submit">Ask ${icon('arrow')}</button></form><div class="suggestions"><button data-question="What should I pack?">Emergency bag</button><button data-question="Which route is safe?">Safe routes</button><button data-question="When will the flood arrive?">Flood timing</button><button data-question="What are your data sources?">Data sources</button></div></div></div></section></main>`}
-function resolve(){return `<main id="main">${pageHero('RESOLVE · AFTER A DISASTER','Recovery you can follow.','See what needs attention, understand the work underway and help bring overlooked problems into view.')}<section class="wrap" style="padding-bottom:70px"><div class="row-flex between" style="margin:16px 0;flex-wrap:wrap"><span class="small muted">${icon('pin')} Selected location: <b data-location-full>${esc(formatLocationDisplay(locationData))}</b></span><span class="tag gray">Connected SQLite Database</span></div>${demoNote('Civic repair records are stored in the persistent backend database. Complaints submitted here are saved with coordinates and media attachments.')}<div class="resolve-stats" id="resolve-stats"></div><div class="section-head"><h2 style="font-size:25px">Your neighbourhood, in progress.</h2><label class="small">Show <select id="issue-filter" style="padding:8px;border:1px solid #dce7df;border-radius:8px;margin-left:8px"><option value="all">All issues</option><option value="open">Open issues</option><option value="Resolved">Resolved</option><option value="Electricity">Electricity</option><option value="Drainage">Drainage</option><option value="Roads">Roads</option></select></label></div><div class="issues-layout"><div><div class="small muted" style="margin-bottom:12px">REPORTED PROBLEMS</div><div class="issue-list" id="issue-list"></div></div><article class="card issue-detail" id="issue-detail" aria-live="polite"></article></div><div class="complaint-cta"><div><h3>Something still needs attention?</h3><p>Share the problem, its location and supporting photos or videos.</p></div><button class="btn" data-action="complaint">Raise a Complaint ${icon('arrow')}</button></div><div class="subtle" style="margin-top:20px">${icon('shield')} Every issue has a verified ID, a responsible team, and a change history recorded in the database.</div></section></main>`}
+function resolve(){return `<main id="main">${pageHero('RESOLVE · AFTER A DISASTER','Recovery you can follow.','See what needs attention, understand the work underway and help bring overlooked problems into view.')}<section class="wrap" style="padding-bottom:70px"><div class="row-flex between" style="margin:16px 0;flex-wrap:wrap"><span class="small muted">${icon('pin')} Selected location: <b data-location-full>${esc(formatLocationDisplay(locationData))}</b></span><span class="tag gray" data-backend-status>Checking backend…</span></div>${demoNote('Civic repair records are stored in the persistent backend database. Complaints submitted here are saved with coordinates and media attachments.')}<div class="resolve-stats" id="resolve-stats"></div><div class="section-head"><h2 style="font-size:25px">Your neighbourhood, in progress.</h2><label class="small">Show <select id="issue-filter" style="padding:8px;border:1px solid #dce7df;border-radius:8px;margin-left:8px"><option value="all">All issues</option><option value="open">Open issues</option><option value="Resolved">Resolved</option><option value="Electricity">Electricity</option><option value="Drainage">Drainage</option><option value="Roads">Roads</option></select></label></div><div class="issues-layout"><div><div class="small muted" style="margin-bottom:12px">REPORTED PROBLEMS</div><div class="issue-list" id="issue-list"></div></div><article class="card issue-detail" id="issue-detail" aria-live="polite"></article></div><div class="complaint-cta"><div><h3>Something still needs attention?</h3><p>Share the problem, its location and supporting photos or videos.</p></div><button class="btn" data-action="complaint">Raise a Complaint ${icon('arrow')}</button></div><div class="subtle" style="margin-top:20px">${icon('shield')} Every issue has a verified ID, a responsible team, and a change history recorded in the database.</div></section></main>`}
 function report(){return `<main id="main">${pageHero('REPORT · BEFORE YOU BUILD','Understand the land.<br>Before you build on it.','A clearer starting point for homeowners, builders and planners — backed by geospatial terrain, water proximity & flood analysis.')}<section class="wrap section" style="padding-top:15px"><div class="card report-form"><form id="land-form"><h3>Start a land assessment</h3><p style="font-size:13px">Choose the site and proposed use. We’ll compute real terrain elevation, slope, and waterbody buffers across Tamil Nadu.</p><div class="field"><label for="land-address">Site / locality</label><input id="land-address" value="${esc(formatLocationDisplay(locationData))}" required maxlength="160" placeholder="Locality, district, state"></div><div class="form-grid"><div class="field"><label for="land-use">Proposed use</label><select id="land-use"><option>Individual home</option><option>Apartment building</option><option>Commercial building</option><option>Community facility</option></select></div><div class="field"><label for="land-area">Plot area (m²)</label><input type="number" min="1" max="10000000" id="land-area" value="240" required></div><div class="field"><label for="land-lat">Latitude</label><input id="land-lat" type="number" min="-90" max="90" step="any" value="${locationData.lat.toFixed(4)}" required></div><div class="field"><label for="land-lon">Longitude</label><input id="land-lon" type="number" min="-180" max="180" step="any" value="${locationData.lon.toFixed(4)}" required></div></div><button class="btn" type="submit">Compute land assessment ${icon('arrow')}</button><p class="source-line">Coordinates are evaluated with Copernicus DEM elevation, Shapely waterbody buffers, and Tamil Nadu regional hazard models.</p></form><div class="report-visual"><img src="assets/city.svg" alt="Illustrated land, buildings and water corridor"><h3 style="margin-top:16px">The whole place.<br>Not just the plot.</h3><p>Consider terrain, water, drainage, access and environmental constraints together. Missing evidence is a question to investigate, not a green light to build.</p></div></div><div class="report-result hidden" id="report-result" aria-live="polite"></div><div class="section-head" style="margin-top:55px"><div><span class="eyebrow plain">A BETTER STARTING POINT</span><h2 style="font-size:28px">Ask the questions that matter.</h2></div></div><div class="grid-3">${[['water','Water & drainage','Look beyond a plot boundary. Ask about flood history, drainage connectivity, water bodies and seasonal groundwater.'],['layers','Ground & terrain','Confirm levels, soil bearing capacity and slope conditions through appropriate surveys and engineering tests.'],['report','Rules & approvals','Verify land classification, access rights, setbacks and applicable environmental or coastal restrictions.']].map(a=>`<div class="card"><div class="feature-icon">${icon(a[0])}</div><h3>${a[1]}</h3><p style="font-size:13px;margin:0">${a[2]}</p></div>`).join('')}</div></section></main>`}
-function officials(){return `<main id="main">${pageHero('RESOLVE · OFFICIALS WORKSPACE','Coordinate the work.<br>Reconnect the city.','Authorized coordination dashboard for municipal response teams: dependencies first, location-specific priorities, and server-authorized updates.')}<div class="wrap">${demoNote('Civic Coordination Workspace connected to FastAPI backend. Published updates persist in SQLite and are logged in the audit trail.')}</div><section class="card login-panel" id="official-login"><div class="feature-icon">${icon('lock')}</div><h2 style="font-size:27px">Officials access</h2><p style="font-size:13px">Authorized municipal coordination portal for Tamil Nadu civic disaster & infrastructure teams.</p><form id="official-login-form"><div class="field"><label for="official-id">Official ID</label><input id="official-id" value="OFF-CH-02" required maxlength="30" placeholder="e.g. OFF-CH-02, OFF-CB-03, OFF-TN-01"><small style="color:#5d7566">Demo Accounts: <b>OFF-TN-01</b> (State Commissioner · All TN), <b>OFF-CH-02</b> (Chennai), <b>OFF-CB-03</b> (Coimbatore), <b>OFF-MD-04</b> (Madurai), <b>OFF-SL-05</b> (Salem), <b>OFF-NL-07</b> (Nilgiris)</small></div><div class="field"><label for="official-passcode">Security Passcode</label><input id="official-passcode" type="password" value="SOLUM-TN-2026" required placeholder="Authorized passcode"></div><div class="form-grid"><div class="field"><label for="official-role">Designation / Role</label><select id="official-role"><option value="District coordination officer">District coordination officer</option><option value="State Disaster Commissioner">State Disaster Commissioner</option><option value="Infrastructure repair lead">Infrastructure repair lead</option><option value="Rescue team coordinator">Rescue team coordinator</option></select></div><div class="field"><label for="official-district">Jurisdiction District</label><select id="official-district"><option value="Chennai">Chennai</option><option value="Coimbatore">Coimbatore</option><option value="Madurai">Madurai</option><option value="Salem">Salem</option><option value="Tiruchirappalli">Tiruchirappalli</option><option value="Nilgiris">Nilgiris</option><option value="All-TN">All-TN (Statewide)</option></select></div></div><button class="btn" style="width:100%">Authenticate & Enter Workspace ${icon('arrow')}</button></form><p class="source-line">Protected with HMAC-SHA256 session tokens. Unauthorized cross-district operations are blocked by server-side authorization.</p></section><section class="wrap section hidden" id="official-workspace" style="padding-top:15px"><div class="row-flex between" style="margin-bottom:20px;flex-wrap:wrap"><span class="tag" id="official-role-label"></span><button class="btn-ghost" id="official-logout" style="font-size:12px;padding:8px 16px">Exit workspace</button></div><div class="official-stats-grid" id="official-stats-grid"></div><div class="officer-grid"><div class="card"><div class="row-flex between"><h3 style="margin:0">Suggested repair priorities</h3>${badge('DYNAMIC RANKING','amber')}</div><p style="font-size:12px;margin-top:12px">Life safety → service dependencies → access → restoration. Dynamically prioritized by the backend system.</p><div id="priority-list"></div></div><div class="card"><h3>Resources at a glance</h3><div class="field"><label for="available-funds">Available funds (₹)</label><input id="available-funds" type="number" min="0" max="1000000000" value="1000000"></div><div class="field"><label for="available-crew">Available crew members</label><input id="available-crew" type="number" min="0" max="10000" value="24"></div><div id="budget-summary"></div><button class="btn-soft" id="export-plan" style="margin-top:20px;width:100%">${icon('download')} Export resource plan</button><p class="source-line">Generates a structured recovery allocation plan via FastAPI backend.</p></div></div><div class="grid-2" style="margin-top:24px"><form class="card" id="publish-form"><h3>Share a progress update</h3><div class="field"><label for="update-issue">Issue</label><select id="update-issue"></select></div><div class="form-grid"><div class="field"><label for="update-status">Status</label><select id="update-status"><option>Assessment</option><option>Assigned</option><option>In progress</option><option>Resolved</option></select></div><div class="field"><label for="update-progress">Progress (%)</label><input id="update-progress" type="number" min="0" max="100" value="45" required></div></div><div class="form-grid"><div class="field"><label for="update-crew">Assigned crew members</label><input id="update-crew" type="number" min="0" max="10000" value="8" required></div><div class="field"><label for="update-cost">Estimated work cost (₹)</label><input id="update-cost" type="number" min="0" max="1000000000" value="240000" required></div><div class="field"><label for="update-hours">Estimated work hours</label><input id="update-hours" type="number" min="0" max="8760" value="6" required></div><div class="field"><label for="update-owner">Responsible team</label><input id="update-owner" maxlength="100" required></div></div><div class="field"><label for="update-note">Public update</label><textarea id="update-note" required maxlength="500" placeholder="What has been done? What happens next?"></textarea></div><button class="btn">Publish database update ${icon('arrow')}</button><p class="source-line">Updates sync immediately across all connected citizens.</p></form><div class="card"><h3>Prevent the next disruption</h3><div class="flow" style="grid-template-columns:1fr;margin:20px 0"><div class="subtle">1 · Isolate damaged electricity infrastructure.</div><div class="subtle">2 · Confirm clearance before pumping floodwater.</div><div class="subtle">3 · Clear priority access for response vehicles.</div><div class="subtle">4 · Inspect repairs before restoring services.</div></div><h3 style="font-size:15px">Database Audit History</h3><div id="audit-log" style="font-size:12px;color:#64766b"></div></div></div></section></main>`}
+function officials(){return `<main id="main">${pageHero('RESOLVE · OFFICIALS WORKSPACE','Coordinate the work.<br>Reconnect the city.','Authorized coordination dashboard for municipal response teams: dependencies first, location-specific priorities, and server-authorized updates.')}<div class="wrap">${demoNote('Civic Coordination Workspace connected to FastAPI backend. Published updates persist in SQLite and are logged in the audit trail.')}</div><section class="card login-panel" id="official-login"><div class="feature-icon">${icon('lock')}</div><div style="margin-bottom:10px"><span class="tag gray" data-backend-status>Checking backend connection…</span></div><h2 style="font-size:27px">Officials access</h2><p style="font-size:13px">Authorized municipal coordination portal for Tamil Nadu civic disaster & infrastructure teams.</p><form id="official-login-form"><div class="field"><label for="official-id">Official ID</label><input id="official-id" value="OFF-CH-02" required maxlength="30" placeholder="e.g. OFF-CH-02, OFF-CB-03, OFF-TN-01"><small style="color:#5d7566">Demo / Test Accounts: <b>OFF-TN-01</b> (State Commissioner · All TN), <b>OFF-CH-02</b> (Chennai), <b>OFF-CB-03</b> (Coimbatore), <b>OFF-MD-04</b> (Madurai). Server token verification required.</small></div><div class="field"><label for="official-passcode">Security Passcode</label><input id="official-passcode" type="password" required placeholder="Authorized passcode"></div><div class="form-grid"><div class="field"><label for="official-role">Designation / Role</label><select id="official-role"><option value="District coordination officer">District coordination officer</option><option value="State Disaster Commissioner">State Disaster Commissioner</option><option value="Infrastructure repair lead">Infrastructure repair lead</option><option value="Rescue team coordinator">Rescue team coordinator</option></select></div><div class="field"><label for="official-district">Jurisdiction District</label><select id="official-district"><option value="Chennai">Chennai</option><option value="Coimbatore">Coimbatore</option><option value="Madurai">Madurai</option><option value="Salem">Salem</option><option value="Tiruchirappalli">Tiruchirappalli</option><option value="Nilgiris">Nilgiris</option><option value="All-TN">All-TN (Statewide)</option></select></div></div><button class="btn" style="width:100%">Authenticate & Enter Workspace ${icon('arrow')}</button></form><p class="source-line">Protected with HMAC-SHA256 session tokens. Unauthorized cross-district operations are blocked by server-side authorization.</p></section><section class="wrap section hidden" id="official-workspace" style="padding-top:15px"><div class="row-flex between" style="margin-bottom:20px;flex-wrap:wrap"><span class="tag" id="official-role-label"></span><button class="btn-ghost" id="official-logout" style="font-size:12px;padding:8px 16px">Exit workspace</button></div><div class="official-stats-grid" id="official-stats-grid"></div><div class="officer-grid"><div class="card"><div class="row-flex between"><h3 style="margin:0">Suggested repair priorities</h3>${badge('DYNAMIC RANKING','amber')}</div><p style="font-size:12px;margin-top:12px">Life safety → service dependencies → access → restoration. Dynamically prioritized by the backend system.</p><div id="priority-list"></div></div><div class="card"><h3>Resources at a glance</h3><div class="field"><label for="available-funds">Available funds (₹)</label><input id="available-funds" type="number" min="0" max="1000000000" value="1000000"></div><div class="field"><label for="available-crew">Available crew members</label><input id="available-crew" type="number" min="0" max="10000" value="24"></div><div id="budget-summary"></div><button class="btn-soft" id="export-plan" style="margin-top:20px;width:100%">${icon('download')} Export resource plan</button><p class="source-line">Generates a structured recovery allocation plan via FastAPI backend.</p></div></div><div class="grid-2" style="margin-top:24px"><form class="card" id="publish-form"><h3>Share a progress update</h3><div class="field"><label for="update-issue">Issue</label><select id="update-issue"></select></div><div class="form-grid"><div class="field"><label for="update-status">Status</label><select id="update-status"><option>Assessment</option><option>Assigned</option><option>In progress</option><option>Resolved</option></select></div><div class="field"><label for="update-progress">Progress (%)</label><input id="update-progress" type="number" min="0" max="100" value="45" required></div></div><div class="form-grid"><div class="field"><label for="update-crew">Assigned crew members</label><input id="update-crew" type="number" min="0" max="10000" value="8" required></div><div class="field"><label for="update-cost">Estimated work cost (₹)</label><input id="update-cost" type="number" min="0" max="1000000000" value="240000" required></div><div class="field"><label for="update-hours">Estimated work hours</label><input id="update-hours" type="number" min="0" max="8760" value="6" required></div><div class="field"><label for="update-owner">Responsible team</label><input id="update-owner" maxlength="100" required></div></div><div class="field"><label for="update-note">Public update</label><textarea id="update-note" required maxlength="500" placeholder="What has been done? What happens next?"></textarea></div><button class="btn">Publish database update ${icon('arrow')}</button><p class="source-line">Updates sync immediately across all connected citizens.</p></form><div class="card"><h3>Prevent the next disruption</h3><div class="flow" style="grid-template-columns:1fr;margin:20px 0"><div class="subtle">1 · Isolate damaged electricity infrastructure.</div><div class="subtle">2 · Confirm clearance before pumping floodwater.</div><div class="subtle">3 · Clear priority access for response vehicles.</div><div class="subtle">4 · Inspect repairs before restoring services.</div></div><h3 style="font-size:15px">Database Audit History</h3><div id="audit-log" style="font-size:12px;color:#64766b"></div></div></div></section></main>`}
 function dialogs(){return `<dialog id="location-dialog"><div class="dialog-head"><h2>Start with your location.</h2><button data-close aria-label="Close location dialog">×</button></div><p style="font-size:13px">Use device GPS, search any Tamil Nadu city or locality, or enter direct coordinates.</p><button class="btn-soft" id="use-location" style="width:100%">${icon('pin')} Use my current location</button><form id="location-search-form" style="margin-top:16px"><div class="field"><label for="location-query">Search Tamil Nadu (City, District or Lat/Lon)</label><input id="location-query" placeholder="e.g. Ooty, Madurai, or 11.41, 76.69" required minlength="2" maxlength="100"></div><button class="btn" type="submit">Search ${icon('search')}</button></form><div class="tn-pills-wrap"><div class="tn-pills-title">Tamil Nadu Quick Select:</div><div class="tn-pills">${['Chennai','Coimbatore','Madurai','Tiruchirappalli','Salem','Tirunelveli','Vellore','Erode','Thanjavur','Tiruppur','Hosur','Kanchipuram','Chengalpattu','Ooty','Kodaikanal','Nagercoil','Cuddalore'].map(c=>`<button type="button" class="tn-pill-btn" data-tn-city="${c}">${c}</button>`).join('')}</div></div><div id="location-results" class="location-results" aria-live="polite"></div><button class="text-link" id="chennai-default" style="background:none;border:0;padding:6px 0 0">Use Chennai example</button></dialog>
+<dialog id="complaint-dialog"><div class="dialog-head"><h2>Raise a Complaint</h2><button data-close aria-label="Close complaint dialog">×</button></div><div id="complaint-form-wrap"><p style="font-size:13px">Civic ticket submission — saved to SOLUM database with coordinates and photos.</p><form id="complaint-form"><div class="field"><label for="complaint-subject">Subject</label><input id="complaint-subject" required maxlength="100" placeholder="e.g. Fallen tree blocking our street"></div><div class="form-grid"><div class="field"><label for="complaint-category">Category</label><select id="complaint-category"><option>Roads</option><option>Electricity</option><option>Drainage</option><option>Telecom</option><option>Other</option></select></div><div class="field"><label for="complaint-place">Location / landmark</label><input id="complaint-place" required maxlength="160" placeholder="Street, locality, landmark"></div></div><div class="field"><label for="complaint-description">Description</label><textarea id="complaint-description" required minlength="10" maxlength="1000" placeholder="Describe the problem and who is affected."></textarea></div><div class="field"><label for="complaint-evidence">Photos or videos (optional)</label><input id="complaint-evidence" type="file" accept="image/*,video/*" multiple><small>Up to 3 files, 10 MB each. Uploaded securely to backend storage.</small></div><div class="media-preview" id="media-preview"></div><button class="btn" type="submit" style="margin-top:15px">Submit complaint ${icon('arrow')}</button></form></div><div id="complaint-success" class="hidden"></div></dialog>
+<dialog id="backend-dialog"><div class="dialog-head"><h2>Connect Production Backend</h2><button data-close aria-label="Close dialog">×</button></div><p style="font-size:13px;line-height:1.5;color:#284333">Connect your deployed SOLUM FastAPI backend (e.g. hosted on Render, Railway or Cloud Run) to enable persistent SQLite database storage, authorized officials operations, and AI assistance.</p><form id="backend-connect-form" style="margin-top:16px"><div class="field"><label for="backend-url-input">FastAPI Backend URL</label><input id="backend-url-input" placeholder="https://solum-backend.onrender.com" value="${esc(API_BASE)}" style="width:100%"><small style="color:#64766b;display:block;margin-top:6px">Must be an active public HTTPS service URL running SOLUM's FastAPI application.</small></div><div style="display:flex;gap:10px;margin-top:16px"><button class="btn" type="submit" style="flex:1">Test & Save Connection</button><button class="btn-ghost" type="button" id="backend-reset-btn">Reset</button></div><div id="backend-test-result" style="margin-top:12px;font-size:12px;" aria-live="polite"></div></form><div class="subtle" style="margin-top:20px;font-size:12px"><b>Need to host the backend?</b> Use the included <code>render.yaml</code> or <code>Procfile</code> in your GitHub repository to deploy to Render or Railway with 1 click.</div></dialog>
 <dialog id="complaint-dialog"><div class="dialog-head"><h2>Raise a Complaint</h2><button data-close aria-label="Close complaint dialog">×</button></div><div id="complaint-form-wrap"><p style="font-size:13px">Civic ticket submission — saved to SOLUM database with coordinates and photos.</p><form id="complaint-form"><div class="field"><label for="complaint-subject">Subject</label><input id="complaint-subject" required maxlength="100" placeholder="e.g. Fallen tree blocking our street"></div><div class="form-grid"><div class="field"><label for="complaint-category">Category</label><select id="complaint-category"><option>Roads</option><option>Electricity</option><option>Drainage</option><option>Telecom</option><option>Other</option></select></div><div class="field"><label for="complaint-place">Location / landmark</label><input id="complaint-place" required maxlength="160" placeholder="Street, locality, landmark"></div></div><div class="field"><label for="complaint-description">Description</label><textarea id="complaint-description" required minlength="10" maxlength="1000" placeholder="Describe the problem and who is affected."></textarea></div><div class="field"><label for="complaint-evidence">Photos or videos (optional)</label><input id="complaint-evidence" type="file" accept="image/*,video/*" multiple><small>Up to 3 files, 10 MB each. Uploaded securely to backend storage.</small></div><div class="media-preview" id="media-preview"></div><button class="btn" type="submit" style="margin-top:15px">Submit complaint ${icon('arrow')}</button></form></div><div id="complaint-success" class="hidden"></div></dialog>
 <dialog id="sources-dialog"><div class="dialog-head"><h2>Evidence, not just answers.</h2><button data-close aria-label="Close sources dialog">×</button></div><p style="font-size:13px">Live feeds retain provider links and retrieval status. A cryptographic digest helps compare a retrieved response.</p><div class="source-cards"><a href="https://developers.google.com/maps/documentation/javascript/3d-maps" target="_blank" rel="noopener">Google Maps 3D Platform ↗<small>Photorealistic 3D Maps & Web Components</small></a><a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo ↗<small>Forecast API · CC BY 4.0 · 7-day weather model</small></a><a href="https://mausam.imd.gov.in/chennai/" target="_blank" rel="noopener">IMD Regional Meteorological Centre, Chennai ↗<small>Official weather warnings and bulletins</small></a><a href="https://www.gdacs.org/" target="_blank" rel="noopener">GDACS ↗<small>Global disaster alerts and crisis coordination</small></a><a href="https://chennaicorporation.gov.in/" target="_blank" rel="noopener">Greater Chennai Corporation ↗<small>Civic authority information</small></a><a href="https://bhuvan.nrsc.gov.in/" target="_blank" rel="noopener">ISRO Bhuvan ↗<small>Geoportal reference data</small></a></div><div class="subtle" style="margin-top:18px"><b>Connected Backend Services</b><br>FastAPI asynchronous backend, SQLite relational database with WAL mode, Shapely geospatial terrain processing, and Google Maps 3D Platform.</div><details style="font-size:11px;margin-top:15px"><summary>Latest weather retrieval receipt</summary><pre id="weather-receipt" style="white-space:pre-wrap;word-break:break-word">No live weather response retrieved yet.</pre></details></dialog>
 <button type="button" id="solum-ai-trigger" class="solum-ai-floating-btn" aria-label="Open SOLUM AI Assistant" title="Ask SOLUM AI"><span class="solum-ai-badge-dot"></span>${icon('shield')} Ask SOLUM AI</button>
@@ -136,6 +139,10 @@ document.addEventListener('click',e=>{
     $('#complaint-success').classList.add('hidden');
     $('#complaint-place').value=formatLocationDisplay(locationData);
   }
+  if(type==='connect-backend'||type==='backend'){
+    $('#backend-dialog')?.showModal();
+    return;
+  }
   $('#'+type+'-dialog')?.showModal();
 });
 
@@ -150,9 +157,37 @@ async function api(path, options={}){
   const url = (path.startsWith('http') || !API_BASE) 
     ? path 
     : `${API_BASE}${path.startsWith('/') ? '' : '/'}${path}`;
-  const res = await fetch(url, {...options, signal: AbortSignal.timeout(18000)});
+  const timeoutMs = options.timeoutMs || 4500;
+  const res = await fetch(url, {...options, signal: AbortSignal.timeout(timeoutMs)});
   if(!res.ok) throw Error(`Service unavailable (${res.status})`);
   return res.json();
+}
+
+async function checkBackendHealth(){
+  try{
+    const res = await api('/api/health', { timeoutMs: 3000 });
+    backendConnected = Boolean(res && (res.status === 'healthy' || res.status === 'ok'));
+  }catch(e){
+    backendConnected = false;
+  }
+  updateBackendStatusUI();
+  return backendConnected;
+}
+
+function updateBackendStatusUI(){
+  $$('[data-backend-status]').forEach(el => {
+    if(backendConnected){
+      el.className = 'tag';
+      el.style.background = '#eef6f0';
+      el.style.color = '#0f7a37';
+      el.innerHTML = `${icon('check')} Connected SQLite Database (FastAPI)`;
+    } else {
+      el.className = 'tag gray';
+      el.style.background = '#f4f5f4';
+      el.style.color = '#64766b';
+      el.innerHTML = `○ Offline Mode · <button type="button" data-action="backend" style="border:0;background:none;color:#0f7a37;padding:0;cursor:pointer;text-decoration:underline">Connect Backend</button>`;
+    }
+  });
 }
 
 function updateLocation(l){
@@ -333,23 +368,41 @@ async function loadWeather(){
   $('#weather-status').textContent='Connecting…';
   $('#weather-status').className='tag gray';
   let d=null;
-  try{
-    d=await api('/api/weather?lat='+locationData.lat+'&lon='+locationData.lon);
-  }catch{
-    // Direct client fallback to Open-Meteo for static Netlify hosting
+
+  if(API_BASE || window.location.port === '8000') {
     try{
-      const res=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${locationData.lat}&longitude=${locationData.lon}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&timezone=auto`,{signal:AbortSignal.timeout(10000)});
+      d=await api('/api/weather?lat='+locationData.lat+'&lon='+locationData.lon, { timeoutMs: 3500 });
+    }catch(err){}
+  }
+
+  if(!d || !d.current || !d.daily){
+    // Direct browser fetch to Open-Meteo for public production Netlify hosting
+    try{
+      const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(locationData.lat)}&longitude=${encodeURIComponent(locationData.lon)}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&forecast_days=7&timezone=auto`;
+      const res=await fetch(url, { signal: AbortSignal.timeout(6000) });
       if(res.ok){
         d=await res.json();
         d.retrieved_at=new Date().toISOString();
-        d.receipt_sha256='Open-Meteo Direct Receipt';
+        d.receipt_sha256='Open-Meteo Live API Direct';
       }
-    }catch{}
+    }catch(err){
+      console.warn('Weather fetch error:', err);
+    }
   }
+
   if(gen!==weatherGeneration)return;
   if(!d?.daily?.time||!d?.current){
-    $('#weather-status').textContent='Offline / unavailable';
-    $('#weather-note').textContent='No current values are available. Start SOLUM with the backend launcher and connect to the internet.';
+    $('#weather-status').textContent='Weather service unavailable';
+    $('#weather-status').className='tag amber';
+    $('#weather-note').innerHTML=`Weather forecast feed is unreachable for ${esc(locationData.name)}. <button type="button" class="text-link" id="retry-weather" style="border:0;background:none;color:#0f7a37;padding:0;cursor:pointer;text-decoration:underline">Retry ↻</button>`;
+    $('#weather-content').innerHTML=`
+      <div class="card" style="text-align:center;padding:24px 16px;background:#fbfcfb;border:1px dashed #dce7df">
+        <p style="margin:0 0 10px;font-size:13px;color:#64766b">Live weather forecast is currently unreachable for coordinates (${locationData.lat.toFixed(3)}, ${locationData.lon.toFixed(3)}).</p>
+        <button class="btn-soft" id="retry-weather-btn" style="font-size:12px">Reconnect Weather ↻</button>
+      </div>
+    `;
+    const retry = $('#retry-weather') || $('#retry-weather-btn');
+    if(retry) retry.onclick = loadWeather;
     return;
   }
   const days=d.daily;
@@ -446,12 +499,13 @@ async function inspectCoordinates(lat, lon) {
   toast(`Inspecting coordinates: ${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E`);
   $('#map-title').textContent = `${locationData.name} · ${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
   try {
-    const ctx = await fetch('/api/maps/location-context', {
+    const ctx = await api('/api/maps/location-context', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ latitude: lat, longitude: lon })
-    }).then(r => r.json());
-    if (ctx.elevation_m !== undefined) {
+      body: JSON.stringify({ latitude: lat, longitude: lon }),
+      timeoutMs: 4000
+    });
+    if (ctx && ctx.elevation_m !== undefined) {
       const waterTxt = ctx.water_corridors?.[0] ? ` · Water: ${ctx.water_corridors[0].name} (${ctx.water_corridors[0].distance_m}m)` : '';
       $('#map-subtitle').textContent = `Copernicus Elevation: ${ctx.elevation_m}m AMSL · ${ctx.flood_zone}${waterTxt}`;
       if ($('#brief-coords')) $('#brief-coords').textContent = `${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E`;
@@ -1367,13 +1421,12 @@ async function sendSolumAiMessage(q, inPageChat=false){
       }
     };
 
-    const res=await fetch('/api/chat',{
+    const data=await api('/api/chat',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
+      body:JSON.stringify(payload),
+      timeoutMs: 8000
     });
-    if(!res.ok)throw new Error('Chat service offline');
-    const data=await res.json();
 
     if(typingEl)typingEl.remove();
 
@@ -1467,28 +1520,37 @@ async function loadIssues(){
 }
 
 async function renderResolve(){
-  $('#resolve-stats').innerHTML = '<div class="metric"><span>Loading records…</span><b>…</b><span>Synchronizing</span></div>';
-  await loadIssues();
+  // Immediate render from location catalog so interface is instant and never hangs
+  const targetDistrict = (locationData.district || locationData.name || 'Chennai').trim();
+  const targetLocality = (locationData.locality || '').trim();
+  const qDist = targetDistrict.toLowerCase();
+  const qLoc = targetLocality.toLowerCase();
+  const filteredSeed = issuesSeed.filter(i => {
+    const d = (i.district || 'Chennai').toLowerCase();
+    const p = (i.place || '').toLowerCase();
+    return d.includes(qDist) || qDist.includes(d) || (qLoc && p.includes(qLoc));
+  });
+  if(!issues || !issues.length || !issues.some(i => (i.district || '').toLowerCase().includes(qDist))){
+    issues = filteredSeed.length ? filteredSeed : issuesSeed.filter(i => (i.district || 'Chennai').toLowerCase() === 'chennai');
+  }
 
-  let stats = {
-    total: issues.length,
-    in_progress: issues.filter(i=>i.status==='In progress').length,
-    resolved: issues.filter(i=>i.status==='Resolved').length,
-    awaiting: issues.filter(i=>!['Resolved','In progress'].includes(i.status)).length
+  const renderStats = (customStats) => {
+    let s = customStats || {
+      total: issues.length,
+      in_progress: issues.filter(i=>i.status==='In progress').length,
+      resolved: issues.filter(i=>i.status==='Resolved').length,
+      awaiting: issues.filter(i=>!['Resolved','In progress'].includes(i.status)).length
+    };
+    const el = $('#resolve-stats');
+    if(el) el.innerHTML=[
+      ['Reported issues', s.total ?? s.total_issues ?? 0],
+      ['In progress', s.in_progress ?? 0],
+      ['Resolved', s.resolved ?? s.resolved_issues ?? 0],
+      ['Awaiting next step', s.awaiting ?? s.pending_issues ?? 0]
+    ].map(a=>`<div class="metric"><span>${a[0]}</span><b>${(a[1]||0).toString().padStart(2,'0')}</b><span>${esc(locationData.name)} area</span></div>`).join('');
   };
 
-  try{
-    const targetDistrict = locationData.district || locationData.name || 'Chennai';
-    const apiStats = await api('/api/issues/stats?district=' + encodeURIComponent(targetDistrict));
-    if(apiStats) stats = apiStats;
-  }catch(e){}
-
-  $('#resolve-stats').innerHTML=[
-    ['Reported issues', stats.total],
-    ['In progress', stats.in_progress],
-    ['Resolved', stats.resolved],
-    ['Awaiting next step', stats.awaiting]
-  ].map(a=>`<div class="metric"><span>${a[0]}</span><b>${a[1].toString().padStart(2,'0')}</b><span>${esc(locationData.name)} area</span></div>`).join('');
+  renderStats();
 
   const f = $('#issue-filter')?.value || 'all';
   const filtered = issues.filter(i => f === 'all' || (f === 'open' && i.status !== 'Resolved') || i.status === f || i.type === f);
@@ -1620,9 +1682,11 @@ $('#complaint-form').onsubmit=async e=>{
 
   toast('Submitting complaint to SOLUM database…');
   try{
-    const res=await fetch('/api/issues',{
+    const targetUrl = API_BASE ? `${API_BASE}/api/issues` : '/api/issues';
+    const res=await fetch(targetUrl,{
       method:'POST',
-      body:formData
+      body:formData,
+      signal: AbortSignal.timeout(6000)
     });
     if(!res.ok)throw new Error('Server submission error');
     const created=await res.json();
@@ -1647,7 +1711,20 @@ $('#complaint-form').onsubmit=async e=>{
     const issue={id,title:subject,place,type:category,icon:icons[category]||'tool',priority:'Unassessed',status:'Assessment',progress:0,crew:0,cost:0,hours:0,owner:'Awaiting assignment',reason:'Logged via complaint dialog.',dependency:'Field verification required',update:description,steps:['Complaint saved','Verification pending'],risk:'Do not enter hazardous areas.',local:true,evidence:[]};
     issues.unshift(issue);
     store.set('issues',issues);
-    toast('Saved locally (server was unreachable).');
+    selectedIssue=id;
+
+    $('#complaint-form-wrap').classList.add('hidden');
+    $('#complaint-success').classList.remove('hidden');
+    $('#complaint-success').innerHTML=`<div class="success-state"><div class="feature-icon">${icon('check')}</div><h3>Complaint Saved to Local Queue</h3><p>Your ticket reference is <b>${id}</b>.<br>Recorded for <b>${esc(place)}</b> (${locationData.lat.toFixed(4)}, ${locationData.lon.toFixed(4)}).</p><div class="subtle">Saved locally in session storage. Connect your production FastAPI backend to synchronize into persistent SQLite records.</div><button class="btn" data-close style="margin-top:20px">View ticket</button></div>`;
+    $('#complaint-form').reset();
+    evidenceURLs.forEach(URL.revokeObjectURL);
+    evidenceURLs=[];
+    $('#media-preview').replaceChildren();
+    if(page==='resolve'){
+      $('#issue-filter').value='all';
+      renderResolve();
+    }
+    toast(`Complaint ${id} saved to local queue.`);
   }
 };
 
@@ -1896,7 +1973,7 @@ function initOfficial(){
     }
 
     try{
-      const res = await fetch('/api/officials/updates', {
+      const updated = await api('/api/officials/updates', {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -1909,13 +1986,9 @@ function initOfficial(){
           owner: owner,
           note: note,
           actor_role: officialSession?.role || $('#official-role').value
-        })
+        }),
+        timeoutMs: 6000
       });
-      if(!res.ok){
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.detail || 'Authorization failed');
-      }
-      const updated = await res.json();
       const idx = issues.findIndex(x => x.id === issueId);
       if(idx !== -1) issues[idx] = updated;
       store.set('issues', issues);
@@ -1931,7 +2004,8 @@ function initOfficial(){
     const funds = Number($('#available-funds').value);
     const crew = Number($('#available-crew').value);
     const dist = locationData.district || locationData.name || 'Chennai';
-    window.location.href = `/api/officials/plan/export?available_funds=${funds}&available_crew=${crew}&district=${encodeURIComponent(dist)}`;
+    const baseUrl = API_BASE ? API_BASE : '';
+    window.location.href = `${baseUrl}/api/officials/plan/export?available_funds=${funds}&available_crew=${crew}&district=${encodeURIComponent(dist)}`;
   };
 }
 
@@ -1998,12 +2072,57 @@ function download(name,content,type){
   setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
 
+function initBackendModal(){
+  const backendForm = $('#backend-connect-form');
+  if(backendForm){
+    backendForm.onsubmit = async e => {
+      e.preventDefault();
+      const inputUrl = ($('#backend-url-input')?.value || '').trim().replace(/\/+$/, '');
+      const resultEl = $('#backend-test-result');
+      if(resultEl) resultEl.innerHTML = 'Testing connection to ' + esc(inputUrl) + '…';
+      try {
+        const testRes = await fetch(`${inputUrl}/api/health`, { signal: AbortSignal.timeout(5000) });
+        if(!testRes.ok) throw new Error(`HTTP ${testRes.status}`);
+        const testData = await testRes.json();
+        if(testData.status === 'healthy' || testData.status === 'ok'){
+          API_BASE = inputUrl;
+          localStorage.setItem('SOLUM_API_BASE', inputUrl);
+          backendConnected = true;
+          updateBackendStatusUI();
+          if(resultEl) resultEl.innerHTML = `<span style="color:#0f7a37">✓ Connected successfully to FastAPI backend! (SQLite: ${esc(testData.database || 'ready')})</span>`;
+          toast('Connected to production FastAPI backend.');
+          setTimeout(() => {
+            $('#backend-dialog')?.close();
+            if(page === 'resolve') renderResolve();
+            if(page === 'officials') renderOfficial();
+            if(page === 'index') loadWeather();
+          }, 1200);
+        } else {
+          throw new Error('Unexpected health response');
+        }
+      } catch(err) {
+        if(resultEl) resultEl.innerHTML = `<span style="color:#c53030">✗ Could not reach backend: ${esc(err.message)}. Check that the URL is public and CORS is configured.</span>`;
+      }
+    };
+    $('#backend-reset-btn')?.addEventListener('click', () => {
+      API_BASE = '';
+      localStorage.removeItem('SOLUM_API_BASE');
+      backendConnected = false;
+      updateBackendStatusUI();
+      $('#backend-url-input').value = '';
+      toast('Backend URL reset to default.');
+    });
+  }
+}
+
 if(page==='index')initHome();
 if(page==='prepare')initPrepare();
 if(page==='resolve'){$('#issue-filter').onchange=renderResolve;renderResolve();}
 if(page==='report')initReport();
 if(page==='officials')initOfficial();
 initSolumAi();
+initBackendModal();
+checkBackendHealth();
 
 window.addEventListener('storage',e=>{
   if(e.key==='solum:issues'){
