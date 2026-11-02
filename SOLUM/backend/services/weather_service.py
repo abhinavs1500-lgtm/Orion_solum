@@ -28,7 +28,7 @@ async def get_weather(lat: float, lon: float) -> dict:
     params = {
         "latitude": lat,
         "longitude": lon,
-        "current": "temperature_2m,weather_code",
+        "current": "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
         "daily": "temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,weather_code",
         "forecast_days": 7,
         "timezone": "auto"

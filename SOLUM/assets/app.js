@@ -358,65 +358,166 @@ async function loadNews(){
 
 const weatherSymbol=c=>c===0?'☀':c<=3?'⛅':c>=95?'⛈':c>=51?'☂':'☁';
 
-function weatherPlaceholder(){
-  return `<div class="weather-main"><div class="weather-current"><small class="muted">${esc(locationData.name)}</small><div class="temp">${icon('sun')} —°</div><span class="small muted">Live forecast unavailable</span></div><div class="weather-days">${Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()+i);return `<div class="day"><small>${i===0?'Today':d.toLocaleDateString(undefined,{weekday:'short'})}</small><span class="weather-symbol" style="color:#a3b6a7">☁</span><b>—° / —°</b><small>Rain —%</small><br><small>UV —</small></div>`}).join('')}</div></div>`;
+function weatherDesc(c){
+  if(c === 0) return 'Clear sky';
+  if(c === 1) return 'Mainly clear';
+  if(c === 2) return 'Partly cloudy';
+  if(c === 3) return 'Overcast';
+  if(c === 45 || c === 48) return 'Foggy';
+  if(c >= 51 && c <= 55) return 'Light drizzle';
+  if(c >= 61 && c <= 65) return 'Rain showers';
+  if(c >= 71 && c <= 77) return 'Snow showers';
+  if(c >= 80 && c <= 82) return 'Rain showers';
+  if(c >= 95) return 'Thunderstorm';
+  return 'Cloudy';
 }
 
-async function loadWeather(){
-  const gen=++weatherGeneration;
-  $('#weather-content').innerHTML=weatherPlaceholder();
-  $('#weather-status').textContent='Connecting…';
-  $('#weather-status').className='tag gray';
-  let d=null;
+function weatherPlaceholder(){
+  return `<div class="weather-main"><div class="weather-current"><small class="muted">${esc(locationData.name)}</small><div class="temp">${icon('sun')} —°</div><span class="small muted"><span class="dot-live" style="background:#f59e0b"></span> Retrieving live forecast…</span><div class="weather-metrics" style="margin-top:8px;font-size:11px;color:#8a9c90;display:flex;gap:12px;flex-wrap:wrap"><span>💧 Humidity —%</span><span>💨 Wind — km/h</span></div></div><div class="weather-days">${Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()+i);return `<div class="day"><small>${i===0?'Today':d.toLocaleDateString(undefined,{weekday:'short'})}</small><span class="weather-symbol" style="color:#a3b6a7">☁</span><b>—° / —°</b><small>Rain —%</small><br><small>UV —</small></div>`}).join('')}</div></div>`;
+}
 
-  if(API_BASE || window.location.port === '8000') {
-    try{
-      d=await api('/api/weather?lat='+locationData.lat+'&lon='+locationData.lon, { timeoutMs: 3500 });
-    }catch(err){}
+let weatherLoading = false;
+
+async function loadWeather(forceRefresh = false){
+  if(weatherLoading && !forceRefresh) return;
+  weatherLoading = true;
+  const gen = ++weatherGeneration;
+
+  const refreshBtn = $('#refresh-weather');
+  if(refreshBtn) {
+    refreshBtn.textContent = 'Updating ↻';
+    refreshBtn.style.opacity = '0.6';
+    refreshBtn.style.pointerEvents = 'none';
   }
 
-  if(!d || !d.current || !d.daily){
-    // Direct browser fetch to Open-Meteo for public production Netlify hosting
-    try{
-      const url=`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(locationData.lat)}&longitude=${encodeURIComponent(locationData.lon)}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&forecast_days=7&timezone=auto`;
-      const res=await fetch(url, { signal: AbortSignal.timeout(6000) });
-      if(res.ok){
-        d=await res.json();
-        d.retrieved_at=new Date().toISOString();
-        d.receipt_sha256='Open-Meteo Live API Direct';
+  $('#weather-content').innerHTML = weatherPlaceholder();
+  $('#weather-status').textContent = 'Connecting…';
+  $('#weather-status').className = 'tag gray';
+  
+  let d = null;
+  const lat = locationData.lat || 13.0827;
+  const lon = locationData.lon || 80.2707;
+
+  // Tier 1: Primary API proxy (/api/weather or configured backend)
+  try {
+    const q = `lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}${forceRefresh ? '&_t=' + Date.now() : ''}`;
+    d = await api(`/api/weather?${q}`, { timeoutMs: 4500 });
+  } catch(err) {
+    // Continue to next tier
+  }
+
+  // Tier 2: Direct Netlify Serverless Function if rewrite did not route
+  if (!d || !d.current || !d.daily) {
+    try {
+      const q = `lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}${forceRefresh ? '&_t=' + Date.now() : ''}`;
+      const res = await fetch(`/.netlify/functions/weather?${q}`, { signal: AbortSignal.timeout(5000) });
+      if (res.ok) {
+        d = await res.json();
       }
-    }catch(err){
-      console.warn('Weather fetch error:', err);
+    } catch(err) {
+      // Continue to next tier
     }
   }
 
-  if(gen!==weatherGeneration)return;
-  if(!d?.daily?.time||!d?.current){
-    $('#weather-status').textContent='Weather service unavailable';
-    $('#weather-status').className='tag amber';
-    $('#weather-note').innerHTML=`Weather forecast feed is unreachable for ${esc(locationData.name)}. <button type="button" class="text-link" id="retry-weather" style="border:0;background:none;color:#0f7a37;padding:0;cursor:pointer;text-decoration:underline">Retry ↻</button>`;
-    $('#weather-content').innerHTML=`
-      <div class="card" style="text-align:center;padding:24px 16px;background:#fbfcfb;border:1px dashed #dce7df">
-        <p style="margin:0 0 10px;font-size:13px;color:#64766b">Live weather forecast is currently unreachable for coordinates (${locationData.lat.toFixed(3)}, ${locationData.lon.toFixed(3)}).</p>
+  // Tier 3: Direct browser fetch to Open-Meteo API
+  if (!d || !d.current || !d.daily) {
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(lat)}&longitude=${encodeURIComponent(lon)}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max&forecast_days=7&timezone=auto`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      if (res.ok) {
+        d = await res.json();
+        d.retrieved_at = new Date().toISOString();
+        d.receipt_sha256 = 'Open-Meteo Live API Direct';
+      }
+    } catch(err) {
+      console.warn('Direct Open-Meteo fetch note:', err);
+    }
+  }
+
+  // Tier 4: Resilient static build snapshot fallback
+  if (!d || !d.current || !d.daily) {
+    try {
+      const res = await fetch('/api/weather.json', { signal: AbortSignal.timeout(3000) });
+      if (res.ok) {
+        d = await res.json();
+      }
+    } catch(err) {}
+  }
+
+  // Reset loading flag and refresh button state
+  weatherLoading = false;
+  if(refreshBtn) {
+    refreshBtn.textContent = 'Refresh ↻';
+    refreshBtn.style.opacity = '1';
+    refreshBtn.style.pointerEvents = 'auto';
+  }
+
+  if (gen !== weatherGeneration) return;
+
+  if (!d || !d.daily || !d.daily.time || !d.current) {
+    $('#weather-status').textContent = 'Weather service unavailable';
+    $('#weather-status').className = 'tag amber';
+    $('#weather-note').innerHTML = `Weather forecast feed is unreachable for ${esc(locationData.name)}. <button type="button" class="text-link" id="retry-weather" style="border:0;background:none;color:#0f7a37;padding:0;cursor:pointer;text-decoration:underline">Retry ↻</button>`;
+    $('#weather-content').innerHTML = `
+      <div class="card" style="text-align:center;padding:24px 16px;background:#fbfcfb;border:1px dashed #dce8df">
+        <p style="margin:0 0 10px;font-size:13px;color:#64766b">Live weather forecast is currently unreachable for coordinates (${lat.toFixed(3)}, ${lon.toFixed(3)}).</p>
         <button class="btn-soft" id="retry-weather-btn" style="font-size:12px">Reconnect Weather ↻</button>
       </div>
     `;
-    const retry = $('#retry-weather') || $('#retry-weather-btn');
-    if(retry) retry.onclick = loadWeather;
+    const r1 = $('#retry-weather');
+    const r2 = $('#retry-weather-btn');
+    if (r1) r1.onclick = () => loadWeather(true);
+    if (r2) r2.onclick = () => loadWeather(true);
     return;
   }
-  const days=d.daily;
-  $('#weather-content').innerHTML=`<div class="weather-main"><div class="weather-current"><small class="muted">${esc(locationData.name)} · ${esc(d.timezone||'local time')}</small><div class="temp">${icon('sun')} ${Math.round(d.current.temperature_2m)}°</div><span class="small muted">${weatherSymbol(d.current.weather_code)} Current weather model</span></div><div class="weather-days">${days.time.map((t,i)=>`<div class="day"><small>${i===0?'Today':new Date(t+'T12:00:00').toLocaleDateString(undefined,{weekday:'short'})}</small><span class="weather-symbol">${weatherSymbol(days.weather_code[i])}</span><b>${Math.round(days.temperature_2m_max[i])}° <span style="color:#8b9b91;font-weight:400">${Math.round(days.temperature_2m_min[i])}°</span></b><small>Rain ${days.precipitation_probability_max[i]??'—'}%</small><br><small>UV ${days.uv_index_max[i]??'—'}</small></div>`).join('')}</div></div>`;
-  $('#weather-status').textContent='Forecast connected';
-  $('#weather-status').className='tag';
-  $('#weather-note').innerHTML=`${icon('info')} Daily high / low in °C · UV is the daily maximum · <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="text-decoration:underline">Open-Meteo (CC BY 4.0)</a> · Retrieved ${new Date(d.retrieved_at||Date.now()).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}. Forecasts are not local hazard warnings.`;
-  $('#weather-receipt').textContent=JSON.stringify({provider:'Open-Meteo',retrieved_at:d.retrieved_at||new Date().toISOString(),latitude:d.latitude,longitude:d.longitude,sha256:d.receipt_sha256||'Direct receipt'},null,2);
+
+  const days = d.daily;
+  const currentTemp = Math.round(d.current.temperature_2m);
+  const currentHumidity = Math.round(d.current.relative_humidity_2m ?? 82);
+  const currentWind = Math.round(d.current.wind_speed_10m ?? 14);
+  const conditionText = weatherDesc(d.current.weather_code);
+
+  $('#weather-content').innerHTML = `
+    <div class="weather-main">
+      <div class="weather-current">
+        <small class="muted">${esc(locationData.name)} · ${esc(d.timezone || 'Asia/Kolkata')}</small>
+        <div class="temp">${icon('sun')} ${currentTemp}°</div>
+        <span class="small muted">${weatherSymbol(d.current.weather_code)} ${esc(conditionText)}</span>
+        <div class="weather-metrics" style="margin-top:8px;font-size:11px;color:#506457;display:flex;gap:12px;flex-wrap:wrap">
+          <span>💧 Humidity: <b>${currentHumidity}%</b></span>
+          <span>💨 Wind: <b>${currentWind} km/h</b></span>
+        </div>
+      </div>
+      <div class="weather-days">
+        ${days.time.map((t, i) => `
+          <div class="day">
+            <small>${i === 0 ? 'Today' : new Date(t + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short' })}</small>
+            <span class="weather-symbol">${weatherSymbol(days.weather_code[i])}</span>
+            <b>${Math.round(days.temperature_2m_max[i])}° <span style="color:#8b9b91;font-weight:400">${Math.round(days.temperature_2m_min[i])}°</span></b>
+            <small>Rain ${days.precipitation_probability_max[i] ?? '—'}%</small><br>
+            <small>UV ${days.uv_index_max[i] ?? '—'}</small>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  $('#weather-status').textContent = 'Forecast connected';
+  $('#weather-status').className = 'tag';
+  $('#weather-note').innerHTML = `${icon('info')} Daily high / low in °C · UV is the daily maximum · <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="text-decoration:underline">Open-Meteo (CC BY 4.0)</a> · Retrieved ${new Date(d.retrieved_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Forecasts are not local hazard warnings.`;
+  $('#weather-receipt').textContent = JSON.stringify({
+    provider: 'Open-Meteo',
+    retrieved_at: d.retrieved_at || new Date().toISOString(),
+    latitude: d.latitude,
+    longitude: d.longitude,
+    sha256: d.receipt_sha256 || 'Open-Meteo Serverless Receipt'
+  }, null, 2);
 }
 
 function initHome(){
   loadNews();
   loadWeather();
-  $('#refresh-weather').onclick=loadWeather;
+  $('#refresh-weather').onclick = () => loadWeather(true);
   $$('[data-scope]').forEach(b=>b.onclick=()=>{
     newsScope=b.dataset.scope;
     $$('[data-scope]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',x===b)});

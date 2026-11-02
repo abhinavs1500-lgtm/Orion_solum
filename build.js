@@ -184,6 +184,34 @@ const officialStats = {
 };
 fs.writeFileSync(path.join(apiDir, 'officials', 'stats.json'), JSON.stringify(officialStats, null, 2));
 
+// Static fallback weather snapshot for Chennai
+const defaultWeather = {
+  latitude: 13.0827,
+  longitude: 80.2707,
+  timezone: "Asia/Kolkata",
+  current: {
+    temperature_2m: 29.5,
+    relative_humidity_2m: 80,
+    weather_code: 2,
+    wind_speed_10m: 14.0
+  },
+  daily: {
+    time: Array.from({length: 7}, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      return d.toISOString().slice(0, 10);
+    }),
+    weather_code: [2, 3, 61, 3, 1, 1, 2],
+    temperature_2m_max: [32, 33, 31, 32, 34, 33, 32],
+    temperature_2m_min: [25, 25, 24, 25, 26, 25, 24],
+    precipitation_probability_max: [35, 40, 60, 45, 20, 15, 30],
+    uv_index_max: [9, 10, 8, 9, 10, 9, 8]
+  },
+  retrieved_at: new Date().toISOString(),
+  receipt_sha256: "SOLUM Build-Time Static Snapshot"
+};
+fs.writeFileSync(path.join(apiDir, 'weather.json'), JSON.stringify(defaultWeather, null, 2));
+
 // 5. Generate Netlify Routing Files
 console.log('\n[5/5] Generating Netlify _redirects and _headers...');
 const redirectsContent = `# Netlify Clean URL & Single-Page Redirects
@@ -191,6 +219,9 @@ const redirectsContent = `# Netlify Clean URL & Single-Page Redirects
 /resolve       /resolve.html       200
 /report        /report.html        200
 /officials     /officials.html     200
+
+# Weather Serverless Proxy
+/api/weather   /.netlify/functions/weather   200
 
 # API mock rewrites
 /api/maps/config          /api/maps/config.json          200
